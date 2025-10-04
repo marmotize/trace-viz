@@ -14,6 +14,12 @@
 - **Format**: `pnpm format` (at root) - format with Prettier
 - **Format check**: `pnpm format:check` (at root) - check formatting
 
+## Git Hooks
+
+- **Pre-commit**: Runs lint-staged (lints and formats staged files)
+- **Commit-msg**: Validates commit message follows conventional commits
+- **Pre-push**: Runs full test suite before pushing
+
 ## Architecture
 
 - **Monorepo**: pnpm workspace with packages (core, react) and examples
@@ -30,3 +36,4 @@
 - **File naming**: kebab-case for files (e.g., version-detector.ts)
 - **Type naming**: PascalCase for types/interfaces, descriptive names
 - **Error handling**: Use OrchestratorState with error field, typed Error objects
+- **Commits**: Follow conventional commits format (feat:, fix:, chore:, docs:, etc.)
