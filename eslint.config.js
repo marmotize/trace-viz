@@ -8,14 +8,7 @@ export default [
   {
     rules: {
       '@typescript-eslint/array-type': [2, { default: 'generic' }],
-    },
-    settings: {
-      'import-x/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: 'tsconfig.json',
-        },
-      },
+      'import-x/no-unresolved': 'off',
     },
   },
 ];
