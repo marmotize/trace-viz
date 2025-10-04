@@ -1,0 +1,33 @@
+{
+  "name": "trace-viz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Trace visualization library with automatic version detection and transformation",
+  "keywords": [],
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint --cache .",
+    "lint:fix": "eslint --cache --fix .",
+    "test": "npm-run-all --parallel lint typecheck test:run format:check",
+    "test:run": "pnpm -r test",
+    "test:watch": "pnpm -r test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@nkzw/eslint-config": "^3.1.2",
+    "@prettier/plugin-oxc": "^0.0.4",
+    "eslint": "^9.36.0",
+    "npm-run-all2": "^8.0.4",
+    "prettier": "^3.6.2",
+    "prettier-plugin-packagejson": "^2.5.19",
+    "typescript": "^5.3.3"
+  },
+  "packageManager": "pnpm@10.18.0"
+}
