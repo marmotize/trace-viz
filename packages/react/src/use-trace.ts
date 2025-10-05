@@ -42,43 +42,21 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
   }, [initialTrace, orchestrator]);
 
   const process = useCallback(
-    (optionsOrTrace: ProcessOptions | RawTrace) => {
-      // Backward compatibility: if rawTrace is passed directly, wrap it
-      const isProcessOptions =
-        optionsOrTrace &&
-        typeof optionsOrTrace === 'object' &&
-        'rawTrace' in optionsOrTrace;
-      const processOptions: ProcessOptions = isProcessOptions
-        ? (optionsOrTrace as ProcessOptions)
-        : { rawTrace: optionsOrTrace as RawTrace };
-      return orchestrator.process(processOptions);
-    },
+    (options: ProcessOptions) => orchestrator.process(options),
     [orchestrator],
   );
 
   const reset = useCallback(() => orchestrator.reset(), [orchestrator]);
 
   const registerVisualizer = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (options: RegisterVisualizerOptions | string, component?: any) => {
-      // Backward compatibility: if version is passed as first arg, wrap it
-      const registerOptions: RegisterVisualizerOptions =
-        typeof options === 'string' ? { component, version: options } : options;
-      return orchestrator.registerVisualizer(registerOptions);
-    },
+    (options: RegisterVisualizerOptions) =>
+      orchestrator.registerVisualizer(options),
     [orchestrator],
   );
 
   const setDefaultVisualizer = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (options: SetDefaultVisualizerOptions | any) => {
-      // Backward compatibility: if component is passed directly, wrap it
-      const setDefaultOptions: SetDefaultVisualizerOptions =
-        typeof options === 'object' && 'component' in options
-          ? options
-          : { component: options };
-      return orchestrator.setDefaultVisualizer(setDefaultOptions);
-    },
+    (options: SetDefaultVisualizerOptions) =>
+      orchestrator.setDefaultVisualizer(options),
     [orchestrator],
   );
 
