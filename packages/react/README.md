@@ -140,16 +140,6 @@ function TraceViewer({ traceData }) {
     });
   };
 
-  // With abort signal
-  const handleProcessWithAbort = () => {
-    const controller = new AbortController();
-    process({
-      rawTrace: traceData,
-      abortSignal: controller.signal,
-    });
-    // Later: controller.abort();
-  };
-
   // ...
 }
 ```
@@ -175,7 +165,6 @@ Returns:
   - `rawTrace`: Trace data to process (required)
   - `overrideVersion`: Optional version to use instead of detection
   - `visualizer`: Optional visualizer component to use instead of registry lookup
-  - `abortSignal`: Optional AbortSignal for cancellation
 - `reset()`: Function to reset state
 - `registerVisualizer(options)`: Register visualizer for version
   - `version`: Version string (required)

@@ -92,14 +92,6 @@ await orchestrator.process({
   rawTrace: traceData,
   visualizer: CustomViewer, // Bypass version detection and registry lookup
 });
-
-// With abort signal for cancellation
-const controller = new AbortController();
-await orchestrator.process({
-  rawTrace: traceData,
-  abortSignal: controller.signal,
-});
-// Later: controller.abort();
 ```
 
 ### Version Detection
@@ -125,7 +117,6 @@ Methods:
   - `rawTrace`: Trace data to process (required)
   - `overrideVersion`: Optional version to use instead of detection
   - `visualizer`: Optional visualizer component to use instead of registry lookup
-  - `abortSignal`: Optional AbortSignal for cancellation
 - `registerVisualizer(options)`: Register visualizer for version
   - `version`: Version string (required)
   - `component`: Visualizer component (required)

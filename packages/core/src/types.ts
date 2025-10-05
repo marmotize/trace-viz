@@ -63,18 +63,6 @@ export interface OrchestratorConfig<T = unknown> {
  */
 export interface ProcessOptions {
   /**
-   * Optional abort signal to cancel long operations.
-   */
-  abortSignal?: {
-    aborted: boolean;
-    addEventListener(
-      type: 'abort',
-      listener: () => void,
-      options?: { once?: boolean },
-    ): void;
-    removeEventListener(type: 'abort', listener: () => void): void;
-  };
-  /**
    * Force the use of a specific version instead of running version detection.
    */
   overrideVersion?: Version;

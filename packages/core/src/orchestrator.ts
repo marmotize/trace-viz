@@ -72,23 +72,8 @@ export class TraceOrchestrator<T = unknown> {
    * Process a raw trace object
    */
   async process(options: ProcessOptions): Promise<void> {
-    const {
-      abortSignal,
-      overrideVersion,
-      rawTrace,
-      visualizer: forcedVisualizer,
-    } = options;
+    const { overrideVersion, rawTrace, visualizer: forcedVisualizer } = options;
     const currentOp = ++this.operationId;
-
-    if (abortSignal?.aborted) {
-      return;
-    }
-    // eslint-disable-next-line unicorn/consistent-function-scoping
-    const onAbort = () => {
-      // Incrementing operationId ensures in-flight work is ignored
-      this.operationId++;
-    };
-    abortSignal?.addEventListener('abort', onAbort, { once: true });
 
     this.updateState({
       error: null,
@@ -113,7 +98,7 @@ export class TraceOrchestrator<T = unknown> {
         });
       }
 
-      if (currentOp !== this.operationId || abortSignal?.aborted) {
+      if (currentOp !== this.operationId) {
         return;
       }
 
@@ -125,7 +110,7 @@ export class TraceOrchestrator<T = unknown> {
         visualizer,
       });
     } catch (error) {
-      if (currentOp !== this.operationId || abortSignal?.aborted) {
+      if (currentOp !== this.operationId) {
         return;
       }
 
@@ -135,8 +120,6 @@ export class TraceOrchestrator<T = unknown> {
         trace: null,
         visualizer: null,
       });
-    } finally {
-      abortSignal?.removeEventListener('abort', onAbort);
     }
   }
 
