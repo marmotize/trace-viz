@@ -12,28 +12,28 @@ graph LR
     subgraph Input["📥 INPUT LAYER"]
         Raw["Raw Trace Object<br/>{version, spans, metadata, ...}"]:::inputBox
     end
-    
+
     subgraph Detection["🔍 DETECTION LAYER"]
         VD["Version Detector<br/>(JSONata Expression)"]:::detectionBox
         VDDetail["• Evaluates expression on trace<br/>• Returns version string<br/>• Falls back if needed"]:::detailBox
     end
-    
+
     subgraph Registry["📚 REGISTRY LAYER"]
         VR["Visualizer Registry<br/>(Version → Component Map)"]:::registryBox
         VRDetail["• Exact match: version === '2'<br/>• Semantic match: '2.1.3' → '2.1' → '2'<br/>• Default fallback"]:::detailBox
     end
-    
+
     subgraph Transform["⚙️ TRANSFORMATION LAYER"]
         TP["Trace Preparer<br/>(Optional)"]:::transformBox
         TPDetail["• Validates trace schema<br/>• Normalizes data structure<br/>• Enriches with metadata<br/>• Type-safe output"]:::detailBox
     end
-    
+
     subgraph Output["📤 OUTPUT LAYER"]
         State["Orchestrator State"]:::outputBox
         StateDetail["• status: 'success' | 'error'<br/>• trace: PreparedTrace<br/>• version: string<br/>• visualizer: Component<br/>• error: Error | null"]:::detailBox
         Viz["Visualizer Component<br/>(React/Vue/Svelte)"]:::outputBox
     end
-    
+
     %% Flow
     Raw --> VD
     VD -.->|"version string"| VDDetail
@@ -44,7 +44,7 @@ graph LR
     TPDetail --> State
     State -.->|"contains"| StateDetail
     State --> Viz
-    
+
     %% Styling
     classDef inputBox fill:#1a1a2e,stroke:#4a90e2,stroke-width:3px,color:#fff
     classDef detectionBox fill:#16213e,stroke:#e94560,stroke-width:3px,color:#fff
@@ -60,20 +60,20 @@ graph LR
 graph TB
     %% Input Stage
     RawTrace[("Raw Trace Data<br/>(JSON Object)")]:::inputNode
-    
+
     %% Orchestrator
     Orchestrator["TraceOrchestrator<br/>process()"]:::orchestratorNode
-    
+
     %% Main Processing Pipeline
     StateUpdate1["Update State<br/>status: 'processing'"]:::stateNode
-    
+
     %% Version Detection Phase
     VersionDetection["Version Detection<br/>versionDetector.detect()"]:::phaseNode
     JSONata["JSONata Expression<br/>Evaluator"]:::detailNode
     VersionExtract["Extract version from<br/>trace using expression"]:::detailNode
     VersionFallback{"Has fallback?"}:::decisionNode
     VersionResult["Version String<br/>(e.g., '1', '2', '1.0')"]:::resultNode
-    
+
     %% Registry Phase
     RegistryLookup["VisualizerRegistry<br/>get(version)"]:::phaseNode
     ExactMatch{"Exact version<br/>match?"}:::decisionNode
@@ -81,39 +81,39 @@ graph TB
     DefaultViz{"Has default<br/>visualizer?"}:::decisionNode
     VisualizerFound["Visualizer Component"]:::resultNode
     RegistryError["Error: No visualizer<br/>for version"]:::errorNode
-    
+
     %% Transformation Phase
     HasPreparer{"Has preparer<br/>configured?"}:::decisionNode
     PreparerTransform["TracePreparer<br/>prepare()"]:::phaseNode
     TransformDetail["Transform raw trace<br/>to visualization format"]:::detailNode
     PreparedTrace["Prepared Trace<br/>(typed, validated)"]:::resultNode
     DirectTrace["Use raw trace<br/>directly"]:::detailNode
-    
+
     %% Concurrency Check
     ConcurrencyCheck{"Operation still<br/>current?"}:::decisionNode
     Abandoned["Abandon<br/>operation"]:::errorNode
-    
+
     %% Success State
     StateUpdateSuccess["Update State<br/>status: 'success'<br/>+ trace + version + visualizer"]:::successNode
-    
+
     %% Error Handling
     ErrorCatch["Catch Error"]:::errorNode
     StateUpdateError["Update State<br/>status: 'error'<br/>+ error object"]:::errorNode
-    
+
     %% Output
     Subscribers["Notify Subscribers<br/>via callbacks"]:::outputNode
     FinalState["OrchestratorState<br/>{status, trace, version,<br/>visualizer, error}"]:::outputNode
-    
+
     %% Registry Setup (Side)
     RegisterViz["registerVisualizer()<br/>registerVisualizers()"]:::setupNode
     SetDefault["setDefaultVisualizer()"]:::setupNode
     RegistryStore[("VisualizerRegistry<br/>Map<Version, Component>")]:::storageNode
-    
+
     %% Flow
     RawTrace --> Orchestrator
     Orchestrator --> StateUpdate1
     StateUpdate1 --> VersionDetection
-    
+
     %% Version Detection Detail
     VersionDetection --> JSONata
     JSONata --> VersionExtract
@@ -121,7 +121,7 @@ graph TB
     VersionFallback -->|No| VersionResult
     VersionFallback -->|Error| VersionResult
     VersionFallback -->|Yes| VersionResult
-    
+
     %% Registry Lookup Flow
     VersionResult --> RegistryLookup
     RegistryLookup --> ExactMatch
@@ -132,35 +132,35 @@ graph TB
     DefaultViz -->|Yes| VisualizerFound
     DefaultViz -->|No| RegistryError
     RegistryError --> ErrorCatch
-    
+
     %% Transformation Flow
     VisualizerFound --> HasPreparer
     HasPreparer -->|Yes| PreparerTransform
     HasPreparer -->|No| DirectTrace
     PreparerTransform --> TransformDetail
     TransformDetail --> PreparedTrace
-    
+
     %% Merge paths
     PreparedTrace --> ConcurrencyCheck
     DirectTrace --> ConcurrencyCheck
-    
+
     %% Concurrency
     ConcurrencyCheck -->|No| Abandoned
     ConcurrencyCheck -->|Yes| StateUpdateSuccess
-    
+
     %% Success path
     StateUpdateSuccess --> Subscribers
     Subscribers --> FinalState
-    
+
     %% Error path
     ErrorCatch --> StateUpdateError
     StateUpdateError --> Subscribers
-    
+
     %% Registry setup (separate flow)
     RegisterViz -.->|"register(version, component)"| RegistryStore
     SetDefault -.->|"setDefault(component)"| RegistryStore
     RegistryStore -.->|used by| RegistryLookup
-    
+
     %% Styling
     classDef inputNode fill:#1a1a2e,stroke:#4a90e2,stroke-width:3px,color:#fff
     classDef orchestratorNode fill:#0f3460,stroke:#4a90e2,stroke-width:3px,color:#fff
@@ -187,7 +187,7 @@ sequenceDiagram
     participant Reg as VisualizerRegistry
     participant Prep as TracePreparer
     participant Viz as Visualizer Component
-    
+
     Note over App,Viz: SETUP PHASE
     App->>Hook: Initialize with config
     Hook->>Orch: new TraceOrchestrator(config)
@@ -197,25 +197,25 @@ sequenceDiagram
     Orch->>Reg: register('2', V2Component)
     Hook->>Orch: subscribe(callback)
     Orch-->>Hook: unsubscribe function
-    
+
     Note over App,Viz: PROCESSING PHASE
     App->>Hook: process(rawTrace)
     Hook->>Orch: process(rawTrace)
-    
+
     rect rgb(26, 26, 46)
         Note over Orch: State: 'processing'
         Orch->>VD: detect(rawTrace)
         VD->>VD: Evaluate JSONata expression
         VD-->>Orch: version = "2"
     end
-    
+
     rect rgb(22, 33, 62)
         Note over Orch: Version Detected
         Orch->>Reg: get("2")
         Reg->>Reg: Exact match lookup
         Reg-->>Orch: V2Component
     end
-    
+
     rect rgb(15, 52, 96)
         Note over Orch: Visualizer Found
         Orch->>Prep: prepare(rawTrace, {version, visualizer})
@@ -223,7 +223,7 @@ sequenceDiagram
         Prep->>Prep: Transform structure
         Prep-->>Orch: preparedTrace (typed)
     end
-    
+
     rect rgb(26, 26, 46)
         Note over Orch: State: 'success'
         Orch->>Orch: updateState({trace, version, visualizer})
@@ -231,11 +231,11 @@ sequenceDiagram
         Hook->>Hook: Update React state
         Hook-->>App: {status, trace, visualizer, version}
     end
-    
+
     Note over App,Viz: RENDER PHASE
     App->>Viz: render <Visualizer trace={trace} />
     Viz-->>App: Rendered visualization
-    
+
     Note over App,Viz: ERROR SCENARIO
     App->>Hook: process(invalidTrace)
     Hook->>Orch: process(invalidTrace)
