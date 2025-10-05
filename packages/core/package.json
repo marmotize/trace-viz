@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "jsonata": "^2.0.3",
-    "zod": "^3.22.4"
+    "zod": "^4.1.0"
   },
   "devDependencies": {
     "tsdown": "^0.15.6",

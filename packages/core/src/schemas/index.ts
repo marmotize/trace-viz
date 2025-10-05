@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 // Common span structure
 export const SpanBase = z.object({
-  attributes: z.record(z.unknown()).optional(),
+  attributes: z.record(z.string(), z.unknown()).optional(),
   endTime: z.number(),
   name: z.string(),
   parentId: z.string().optional(),
@@ -36,7 +36,7 @@ export const SpanV2 = SpanBase.extend({
 });
 
 export const TraceV2Schema = z.object({
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   spans: z.array(SpanV2),
   timestamp: z.number(),
   traceId: z.string(),
