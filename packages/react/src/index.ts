@@ -10,7 +10,7 @@ export type {
   OrchestratorState,
   VisualizerComponent,
   VersionDetector,
-  Transformer,
+  TracePreparer,
   OrchestratorConfig,
   TraceV1,
   TraceV2,

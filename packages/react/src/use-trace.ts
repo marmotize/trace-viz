@@ -6,14 +6,14 @@ import {
 } from '@trace-viz/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-export interface UseTraceOptions extends OrchestratorConfig {
+export interface UseTraceOptions<T = unknown> extends OrchestratorConfig<T> {
   /**
    * Initial trace to process on mount
    */
   initialTrace?: RawTrace;
 }
 
-export function useTrace<T = unknown>(options: UseTraceOptions) {
+export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
   const { initialTrace, ...config } = options;
 
   const orchestrator = useMemo(

@@ -1,7 +1,26 @@
-import { JSONataVersionDetector, useTrace } from '@trace-viz/react';
+import { TraceV1Schema, TraceV2Schema } from '@trace-viz/core';
+import {
+  JSONataVersionDetector,
+  useTrace,
+  type TracePreparer,
+  type TraceV1,
+  type TraceV2,
+} from '@trace-viz/react';
 import { useState } from 'react';
 import { TraceViewerV1 } from './visualizers/TraceViewerV1';
 import { TraceViewerV2 } from './visualizers/TraceViewerV2';
+
+const preparer: TracePreparer<TraceV1 | TraceV2> = {
+  prepare(trace, { version }) {
+    if (version === '1') {
+      return TraceV1Schema.parse(trace);
+    }
+    if (version === '2') {
+      return TraceV2Schema.parse(trace);
+    }
+    return trace as TraceV1 | TraceV2;
+  },
+};
 
 // Sample trace data
 const sampleTraceV1 = {
@@ -62,7 +81,8 @@ export function App() {
     trace,
     version,
     visualizer: Visualizer,
-  } = useTrace({
+  } = useTrace<TraceV1 | TraceV2>({
+    preparer,
     versionDetector: new JSONataVersionDetector({
       expression: 'version',
       fallback: '1',
