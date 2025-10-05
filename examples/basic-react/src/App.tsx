@@ -91,14 +91,14 @@ export function App() {
 
   // Register visualizers
   useState(() => {
-    registerVisualizer('1', TraceViewerV1);
-    registerVisualizer('2', TraceViewerV2);
+    registerVisualizer({ component: TraceViewerV1, version: '1' });
+    registerVisualizer({ component: TraceViewerV2, version: '2' });
   });
 
   const handleLoadTrace = (traceVersion: 'v1' | 'v2') => {
     setSelectedTrace(traceVersion);
     const trace = traceVersion === 'v1' ? sampleTraceV1 : sampleTraceV2;
-    process(trace);
+    process({ rawTrace: trace });
   };
 
   return (

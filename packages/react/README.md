@@ -44,15 +44,15 @@ function TraceViewer({ traceData }) {
 
   // Register visualizers on mount
   useEffect(() => {
-    registerVisualizer('1', TraceViewerV1);
-    registerVisualizer('2', TraceViewerV2);
-    setDefaultVisualizer(DefaultViewer);
+    registerVisualizer({ version: '1', component: TraceViewerV1 });
+    registerVisualizer({ version: '2', component: TraceViewerV2 });
+    setDefaultVisualizer({ component: DefaultViewer });
   }, [registerVisualizer, setDefaultVisualizer]);
 
   // Process trace data
   useEffect(() => {
     if (traceData) {
-      process(traceData);
+      process({ rawTrace: traceData });
     }
   }, [traceData, process]);
 
@@ -83,7 +83,7 @@ function TraceViewer() {
   });
 
   useEffect(() => {
-    registerVisualizer('1', TraceViewerV1);
+    registerVisualizer({ version: '1', component: TraceViewerV1 });
   }, [registerVisualizer]);
 
   // Trace is automatically processed on mount
@@ -114,6 +114,46 @@ function TraceViewer() {
 }
 ```
 
+### With Optional Parameters
+
+```typescript
+import { useTrace } from '@trace-viz/react';
+
+function TraceViewer({ traceData }) {
+  const { process } = useTrace({
+    versionDetector: new JSONataVersionDetector({ expression: 'version' }),
+  });
+
+  // Override version detection
+  const handleProcessWithVersion = () => {
+    process({
+      rawTrace: traceData,
+      overrideVersion: '2.1.0', // Use specific version
+    });
+  };
+
+  // Use specific visualizer
+  const handleProcessWithVisualizer = () => {
+    process({
+      rawTrace: traceData,
+      visualizer: CustomViewer, // Bypass version detection
+    });
+  };
+
+  // With abort signal
+  const handleProcessWithAbort = () => {
+    const controller = new AbortController();
+    process({
+      rawTrace: traceData,
+      abortSignal: controller.signal,
+    });
+    // Later: controller.abort();
+  };
+
+  // ...
+}
+```
+
 ## Peer Dependencies
 
 This package requires `react` as a peer dependency. Make sure you have React installed in your project.
@@ -131,10 +171,17 @@ Hook options:
 Returns:
 
 - `state`: Current orchestrator state (`{ status, trace, version, visualizer, error }`)
-- `process(trace)`: Function to process trace data
+- `process(options)`: Function to process trace data
+  - `rawTrace`: Trace data to process (required)
+  - `overrideVersion`: Optional version to use instead of detection
+  - `visualizer`: Optional visualizer component to use instead of registry lookup
+  - `abortSignal`: Optional AbortSignal for cancellation
 - `reset()`: Function to reset state
-- `registerVisualizer(version, component)`: Register visualizer for version
-- `setDefaultVisualizer(component)`: Set default/fallback visualizer
+- `registerVisualizer(options)`: Register visualizer for version
+  - `version`: Version string (required)
+  - `component`: Visualizer component (required)
+- `setDefaultVisualizer(options)`: Set default/fallback visualizer
+  - `component`: Visualizer component (required)
 - `orchestrator`: Direct access to TraceOrchestrator instance
 
 ## Development

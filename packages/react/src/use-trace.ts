@@ -2,7 +2,10 @@ import {
   TraceOrchestrator,
   type OrchestratorConfig,
   type OrchestratorState,
+  type ProcessOptions,
   type RawTrace,
+  type RegisterVisualizerOptions,
+  type SetDefaultVisualizerOptions,
 } from '@trace-viz/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -34,12 +37,22 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
   // Process initial trace on mount
   useEffect(() => {
     if (initialTrace) {
-      orchestrator.process(initialTrace);
+      orchestrator.process({ rawTrace: initialTrace });
     }
   }, [initialTrace, orchestrator]);
 
   const process = useCallback(
-    (trace: RawTrace) => orchestrator.process(trace),
+    (optionsOrTrace: ProcessOptions | RawTrace) => {
+      // Backward compatibility: if rawTrace is passed directly, wrap it
+      const isProcessOptions =
+        optionsOrTrace &&
+        typeof optionsOrTrace === 'object' &&
+        'rawTrace' in optionsOrTrace;
+      const processOptions: ProcessOptions = isProcessOptions
+        ? (optionsOrTrace as ProcessOptions)
+        : { rawTrace: optionsOrTrace as RawTrace };
+      return orchestrator.process(processOptions);
+    },
     [orchestrator],
   );
 
@@ -47,14 +60,25 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
 
   const registerVisualizer = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (version: string, component: any) =>
-      orchestrator.registerVisualizer(version, component),
+    (options: RegisterVisualizerOptions | string, component?: any) => {
+      // Backward compatibility: if version is passed as first arg, wrap it
+      const registerOptions: RegisterVisualizerOptions =
+        typeof options === 'string' ? { component, version: options } : options;
+      return orchestrator.registerVisualizer(registerOptions);
+    },
     [orchestrator],
   );
 
   const setDefaultVisualizer = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (component: any) => orchestrator.setDefaultVisualizer(component),
+    (options: SetDefaultVisualizerOptions | any) => {
+      // Backward compatibility: if component is passed directly, wrap it
+      const setDefaultOptions: SetDefaultVisualizerOptions =
+        typeof options === 'object' && 'component' in options
+          ? options
+          : { component: options };
+      return orchestrator.setDefaultVisualizer(setDefaultOptions);
+    },
     [orchestrator],
   );
 

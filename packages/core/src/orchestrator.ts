@@ -1,7 +1,9 @@
 import type {
   OrchestratorConfig,
   OrchestratorState,
-  RawTrace,
+  ProcessOptions,
+  RegisterVisualizerOptions,
+  SetDefaultVisualizerOptions,
   StateSubscriber,
   VisualizerComponent,
 } from './types.js';
@@ -45,8 +47,8 @@ export class TraceOrchestrator<T = unknown> {
   /**
    * Register visualizer for a version
    */
-  registerVisualizer(version: string, component: VisualizerComponent): this {
-    this.registry.register(version, component);
+  registerVisualizer(options: RegisterVisualizerOptions): this {
+    this.registry.register(options);
     return this;
   }
 
@@ -61,16 +63,32 @@ export class TraceOrchestrator<T = unknown> {
   /**
    * Set default visualizer
    */
-  setDefaultVisualizer(component: VisualizerComponent): this {
-    this.registry.setDefault(component);
+  setDefaultVisualizer(options: SetDefaultVisualizerOptions): this {
+    this.registry.setDefault(options);
     return this;
   }
 
   /**
    * Process a raw trace object
    */
-  async process(rawTrace: RawTrace): Promise<void> {
+  async process(options: ProcessOptions): Promise<void> {
+    const {
+      abortSignal,
+      overrideVersion,
+      rawTrace,
+      visualizer: forcedVisualizer,
+    } = options;
     const currentOp = ++this.operationId;
+
+    if (abortSignal?.aborted) {
+      return;
+    }
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const onAbort = () => {
+      // Incrementing operationId ensures in-flight work is ignored
+      this.operationId++;
+    };
+    abortSignal?.addEventListener('abort', onAbort, { once: true });
 
     this.updateState({
       error: null,
@@ -80,10 +98,11 @@ export class TraceOrchestrator<T = unknown> {
 
     try {
       // Detect version
-      const version = this.config.versionDetector.detect(rawTrace);
+      const version =
+        overrideVersion ?? this.config.versionDetector.detect(rawTrace);
 
       // Get visualizer
-      const visualizer = this.registry.get(version);
+      const visualizer = forcedVisualizer ?? this.registry.get(version);
 
       // Prepare trace for visualization
       let preparedTrace: unknown = rawTrace;
@@ -94,7 +113,7 @@ export class TraceOrchestrator<T = unknown> {
         });
       }
 
-      if (currentOp !== this.operationId) {
+      if (currentOp !== this.operationId || abortSignal?.aborted) {
         return;
       }
 
@@ -106,7 +125,7 @@ export class TraceOrchestrator<T = unknown> {
         visualizer,
       });
     } catch (error) {
-      if (currentOp !== this.operationId) {
+      if (currentOp !== this.operationId || abortSignal?.aborted) {
         return;
       }
 
@@ -116,6 +135,8 @@ export class TraceOrchestrator<T = unknown> {
         trace: null,
         visualizer: null,
       });
+    } finally {
+      abortSignal?.removeEventListener('abort', onAbort);
     }
   }
 

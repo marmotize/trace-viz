@@ -57,3 +57,50 @@ export interface OrchestratorConfig<T = unknown> {
    */
   versionDetector: VersionDetector;
 }
+
+/**
+ * Options for processing a trace
+ */
+export interface ProcessOptions {
+  /**
+   * Optional abort signal to cancel long operations.
+   */
+  abortSignal?: {
+    aborted: boolean;
+    addEventListener(
+      type: 'abort',
+      listener: () => void,
+      options?: { once?: boolean },
+    ): void;
+    removeEventListener(type: 'abort', listener: () => void): void;
+  };
+  /**
+   * Force the use of a specific version instead of running version detection.
+   */
+  overrideVersion?: Version;
+  rawTrace: RawTrace;
+  /**
+   * Force the use of a specific visualizer instead of looking it up.
+   */
+  visualizer?: VisualizerComponent;
+}
+
+/**
+ * Options for registering a visualizer
+ */
+export interface RegisterVisualizerOptions {
+  component: VisualizerComponent;
+  /**
+   * Whether to replace existing visualizer for the same version if present.
+   * Default behavior is to replace (to match current semantics).
+   */
+  replace?: boolean;
+  version: Version;
+}
+
+/**
+ * Options for setting a default visualizer
+ */
+export interface SetDefaultVisualizerOptions {
+  component: VisualizerComponent;
+}

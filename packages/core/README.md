@@ -39,12 +39,12 @@ const orchestrator = new TraceOrchestrator({
 });
 
 // Register visualizers for different versions
-orchestrator.registerVisualizer('1', TraceViewerV1);
-orchestrator.registerVisualizer('2', TraceViewerV2);
-orchestrator.setDefaultVisualizer(DefaultViewer);
+orchestrator.registerVisualizer({ version: '1', component: TraceViewerV1 });
+orchestrator.registerVisualizer({ version: '2', component: TraceViewerV2 });
+orchestrator.setDefaultVisualizer({ component: DefaultViewer });
 
 // Process trace data
-await orchestrator.process(traceData);
+await orchestrator.process({ rawTrace: traceData });
 
 // Subscribe to state changes
 const unsubscribe = orchestrator.subscribe((state) => {
@@ -78,6 +78,30 @@ const orchestrator = new TraceOrchestrator({
 });
 ```
 
+### With Optional Parameters
+
+```typescript
+// Override version detection
+await orchestrator.process({
+  rawTrace: traceData,
+  overrideVersion: '2.1.0', // Use specific version instead of detection
+});
+
+// Use specific visualizer
+await orchestrator.process({
+  rawTrace: traceData,
+  visualizer: CustomViewer, // Bypass version detection and registry lookup
+});
+
+// With abort signal for cancellation
+const controller = new AbortController();
+await orchestrator.process({
+  rawTrace: traceData,
+  abortSignal: controller.signal,
+});
+// Later: controller.abort();
+```
+
 ### Version Detection
 
 The orchestrator uses semantic version matching:
@@ -97,10 +121,17 @@ Constructor options:
 
 Methods:
 
-- `process(trace)`: Process trace data
-- `registerVisualizer(version, component)`: Register visualizer for version
+- `process(options)`: Process trace data
+  - `rawTrace`: Trace data to process (required)
+  - `overrideVersion`: Optional version to use instead of detection
+  - `visualizer`: Optional visualizer component to use instead of registry lookup
+  - `abortSignal`: Optional AbortSignal for cancellation
+- `registerVisualizer(options)`: Register visualizer for version
+  - `version`: Version string (required)
+  - `component`: Visualizer component (required)
 - `registerVisualizers(mapping)`: Register multiple visualizers
-- `setDefaultVisualizer(component)`: Set fallback visualizer
+- `setDefaultVisualizer(options)`: Set fallback visualizer
+  - `component`: Visualizer component (required)
 - `subscribe(callback)`: Subscribe to state changes
 - `reset()`: Reset to initial state
 

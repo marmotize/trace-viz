@@ -1,4 +1,9 @@
-import type { Version, VisualizerComponent } from './types.js';
+import type {
+  RegisterVisualizerOptions,
+  SetDefaultVisualizerOptions,
+  Version,
+  VisualizerComponent,
+} from './types.js';
 
 export class VisualizerRegistry {
   private visualizers = new Map<Version, VisualizerComponent>();
@@ -7,7 +12,10 @@ export class VisualizerRegistry {
   /**
    * Register a visualizer for a specific version
    */
-  register(version: Version, component: VisualizerComponent): this {
+  register(options: RegisterVisualizerOptions): this {
+    const { component, version } = options;
+    // Current behavior is to replace; we keep this as-is regardless of `replace`
+    // but we keep the flag for future use (e.g., throw on duplicates when replace === false).
     this.visualizers.set(version, component);
     return this;
   }
@@ -17,7 +25,7 @@ export class VisualizerRegistry {
    */
   registerMany(mapping: Record<Version, VisualizerComponent>): this {
     Object.entries(mapping).forEach(([version, component]) => {
-      this.register(version, component);
+      this.register({ component, version });
     });
     return this;
   }
@@ -25,7 +33,8 @@ export class VisualizerRegistry {
   /**
    * Set default visualizer fallback
    */
-  setDefault(component: VisualizerComponent): this {
+  setDefault(options: SetDefaultVisualizerOptions): this {
+    const { component } = options;
     this.defaultVisualizer = component;
     return this;
   }
