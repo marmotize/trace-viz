@@ -4,14 +4,17 @@ export type { UseTraceOptions } from './use-trace.js';
 // Re-export core types for convenience
 export { JSONataVersionDetector } from '@trace-viz/core';
 export type {
-  Version,
-  RawTrace,
-  OrchestratorStatus,
-  OrchestratorState,
-  VisualizerComponent,
-  VersionDetector,
-  TracePreparer,
   OrchestratorConfig,
+  OrchestratorState,
+  OrchestratorStatus,
+  ProcessOptions,
+  RawTrace,
+  RegisterVisualizerOptions,
+  SetDefaultVisualizerOptions,
+  TracePreparer,
   TraceV1,
   TraceV2,
+  Version,
+  VersionDetector,
+  VisualizerComponent,
 } from '@trace-viz/core';

@@ -1,7 +1,9 @@
 import type {
   OrchestratorConfig,
   OrchestratorState,
-  RawTrace,
+  ProcessOptions,
+  RegisterVisualizerOptions,
+  SetDefaultVisualizerOptions,
   StateSubscriber,
   VisualizerComponent,
 } from './types.js';
@@ -13,7 +15,7 @@ export class TraceOrchestrator<T = unknown> {
   private registry: VisualizerRegistry;
   private operationId = 0;
 
-  constructor(private config: OrchestratorConfig) {
+  constructor(private config: OrchestratorConfig<T>) {
     this.state = {
       error: null,
       rawTrace: null,
@@ -45,8 +47,8 @@ export class TraceOrchestrator<T = unknown> {
   /**
    * Register visualizer for a version
    */
-  registerVisualizer(version: string, component: VisualizerComponent): this {
-    this.registry.register(version, component);
+  registerVisualizer(options: RegisterVisualizerOptions): this {
+    this.registry.register(options);
     return this;
   }
 
@@ -61,15 +63,16 @@ export class TraceOrchestrator<T = unknown> {
   /**
    * Set default visualizer
    */
-  setDefaultVisualizer(component: VisualizerComponent): this {
-    this.registry.setDefault(component);
+  setDefaultVisualizer(options: SetDefaultVisualizerOptions): this {
+    this.registry.setDefault(options);
     return this;
   }
 
   /**
    * Process a raw trace object
    */
-  async process(rawTrace: RawTrace): Promise<void> {
+  async process(options: ProcessOptions): Promise<void> {
+    const { overrideVersion, rawTrace, visualizer: forcedVisualizer } = options;
     const currentOp = ++this.operationId;
 
     this.updateState({
@@ -80,10 +83,11 @@ export class TraceOrchestrator<T = unknown> {
 
     try {
       // Detect version
-      const version = this.config.versionDetector.detect(rawTrace);
+      const version =
+        overrideVersion ?? this.config.versionDetector.detect(rawTrace);
 
       // Get visualizer
-      const visualizer = this.registry.get(version);
+      const visualizer = forcedVisualizer ?? this.registry.get(version);
 
       // Prepare trace for visualization
       let preparedTrace: unknown = rawTrace;
