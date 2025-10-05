@@ -37,3 +37,10 @@
 - **Type naming**: PascalCase for types/interfaces, descriptive names
 - **Error handling**: Use OrchestratorState with error field, typed Error objects
 - **Commits**: Follow conventional commits format (feat:, fix:, chore:, docs:, etc.)
+
+## Documentation
+
+- **README.md**: Always check and update the README before pushing changes
+  - Run `pnpm format` to ensure proper formatting (Prettier adds blank lines between Mermaid code blocks)
+  - Keep architecture diagrams and documentation in sync with code changes
+  - Update usage examples if APIs change
