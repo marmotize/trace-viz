@@ -2,22 +2,44 @@
   "name": "@trace-viz/react",
   "version": "0.1.0",
   "description": "React hooks and components for trace visualization",
+  "keywords": [
+    "react",
+    "hooks",
+    "trace",
+    "visualization"
+  ],
+  "homepage": "https://github.com/marmotize/trace-viz/tree/main/packages/react#readme",
+  "bugs": {
+    "url": "https://github.com/marmotize/trace-viz/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marmotize/trace-viz.git",
+    "directory": "packages/react"
+  },
   "license": "MIT",
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
+    "prepublishOnly": "pnpm build",
     "test": "vitest --run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
@@ -32,6 +54,18 @@
     "vitest": "^1.2.0"
   },
   "peerDependencies": {
-    "react": "^18.0.0"
+    "react": "^18 || ^19"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": false
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

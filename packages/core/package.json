@@ -2,22 +2,42 @@
   "name": "@trace-viz/core",
   "version": "0.1.0",
   "description": "Core trace visualization orchestration library",
+  "keywords": [
+    "trace",
+    "visualization"
+  ],
+  "homepage": "https://github.com/marmotize/trace-viz/tree/main/packages/core#readme",
+  "bugs": {
+    "url": "https://github.com/marmotize/trace-viz/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marmotize/trace-viz.git",
+    "directory": "packages/core"
+  },
   "license": "MIT",
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
+    "prepublishOnly": "pnpm build",
     "test": "vitest --run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
@@ -29,5 +49,12 @@
     "tsdown": "^0.15.6",
     "typescript": "^5.3.3",
     "vitest": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

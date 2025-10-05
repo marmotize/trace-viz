@@ -6,6 +6,8 @@ export default defineConfig({
   entry: ['src/index.ts'],
   external: ['react', '@trace-viz/core'],
   format: ['esm'],
+  minify: false,
   sourcemap: true,
+  target: 'es2021',
   treeshake: true,
 });
