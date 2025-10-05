@@ -11,19 +11,22 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20, 22]
+        node-version: ['20.19', '22']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
 
       - name: Lint
         run: pnpm lint
@@ -36,9 +39,6 @@ jobs:
 
       - name: Format check
         run: pnpm format:check
-
-      - name: Build
-        run: pnpm build
 
       - name: Pack dry run
         run: pnpm pack:dry
