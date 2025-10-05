@@ -19,7 +19,7 @@
     "pack:dry": "pnpm -r --filter './packages/*' exec bash -lc 'npm pack --dry-run | tail -n +1'",
     "prepare": "husky",
     "release:publish": "pnpm -r build && changeset publish",
-    "release:version": "changeset version",
+    "release:version": "changeset version && pnpm install --no-frozen-lockfile",
     "test": "npm-run-all --parallel lint typecheck test:run format:check",
     "test:run": "pnpm -r test",
     "test:watch": "pnpm -r test",
