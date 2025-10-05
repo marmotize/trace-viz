@@ -50,6 +50,6 @@
 - **NEVER commit directly to main**: Always use feature branches
   1. Create a branch: `git checkout -b <branch-name>`
   2. Make changes and commit
-  3. Push the branch: `git push -u origin <branch-name>` or use GitHub MCP
+  3. Push the branch using GitHub MCP
   4. Create a PR using GitHub MCP tools
 - **Branch naming**: Use conventional format (feat/, fix/, chore/, docs/, etc.)
