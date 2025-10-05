@@ -11,6 +11,7 @@ export class TraceOrchestrator<T = unknown> {
   private subscribers = new Set<StateSubscriber<T>>();
   private state: OrchestratorState<T>;
   private registry: VisualizerRegistry;
+  private operationId = 0;
 
   constructor(private config: OrchestratorConfig) {
     this.state = {
@@ -69,6 +70,8 @@ export class TraceOrchestrator<T = unknown> {
    * Process a raw trace object
    */
   async process(rawTrace: RawTrace): Promise<void> {
+    const currentOp = ++this.operationId;
+
     this.updateState({
       error: null,
       rawTrace,
@@ -91,6 +94,10 @@ export class TraceOrchestrator<T = unknown> {
         });
       }
 
+      if (currentOp !== this.operationId) {
+        return;
+      }
+
       this.updateState({
         error: null,
         status: 'success',
@@ -99,6 +106,10 @@ export class TraceOrchestrator<T = unknown> {
         visualizer,
       });
     } catch (error) {
+      if (currentOp !== this.operationId) {
+        return;
+      }
+
       this.updateState({
         error: error instanceof Error ? error : new Error(String(error)),
         status: 'error',
