@@ -20,7 +20,7 @@ pnpm add @trace-viz/core
 
 ## Requirements
 
-- Node.js >=18
+- Node.js >=20
 - ESM-only (no CommonJS support)
 
 ## Usage

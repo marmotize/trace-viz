@@ -19,7 +19,7 @@ pnpm add @trace-viz/react react
 
 ## Requirements
 
-- Node.js >=18
+- Node.js >=20
 - React ^18 || ^19
 - ESM-only (no CommonJS support)
 

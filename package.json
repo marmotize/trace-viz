@@ -23,7 +23,7 @@
     "test": "npm-run-all --parallel lint typecheck test:run format:check",
     "test:run": "pnpm -r test",
     "test:watch": "pnpm -r test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "pnpm -r --filter './packages/*' typecheck"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",

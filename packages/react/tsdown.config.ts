@@ -8,6 +8,6 @@ export default defineConfig({
   format: ['esm'],
   minify: false,
   sourcemap: true,
-  target: 'es2021',
+  target: 'es2023',
   treeshake: true,
 });

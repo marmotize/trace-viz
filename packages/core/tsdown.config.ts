@@ -4,10 +4,10 @@ export default defineConfig({
   clean: true,
   dts: true,
   entry: ['src/index.ts'],
-  external: [],
+  external: ['jsonata', 'zod'],
   format: ['esm'],
   minify: false,
   sourcemap: true,
-  target: 'es2021',
+  target: 'es2023',
   treeshake: true,
 });
