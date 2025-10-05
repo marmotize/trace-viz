@@ -193,14 +193,14 @@ sequenceDiagram
     Hook->>Orch: new TraceOrchestrator(config)
     App->>Hook: registerVisualizers({v1, v2})
     Hook->>Orch: registerVisualizers()
-    Orch->>Reg: register('1', V1Component)
-    Orch->>Reg: register('2', V2Component)
+    Orch->>Reg: register({ version: '1', component: V1Component })
+    Orch->>Reg: register({ version: '2', component: V2Component })
     Hook->>Orch: subscribe(callback)
     Orch-->>Hook: unsubscribe function
 
     Note over App,Viz: PROCESSING PHASE
-    App->>Hook: process(rawTrace)
-    Hook->>Orch: process(rawTrace)
+    App->>Hook: process({ rawTrace })
+    Hook->>Orch: process({ rawTrace })
 
     rect rgb(26, 26, 46)
         Note over Orch: State: 'processing'
@@ -237,8 +237,8 @@ sequenceDiagram
     Viz-->>App: Rendered visualization
 
     Note over App,Viz: ERROR SCENARIO
-    App->>Hook: process(invalidTrace)
-    Hook->>Orch: process(invalidTrace)
+    App->>Hook: process({ rawTrace: invalidTrace })
+    Hook->>Orch: process({ rawTrace: invalidTrace })
     VD->>VD: Expression fails
     VD-->>Orch: throws Error
     Orch->>Orch: updateState({status: 'error', error})
