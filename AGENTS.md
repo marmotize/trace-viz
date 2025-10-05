@@ -25,7 +25,7 @@
 - **Monorepo**: pnpm workspace with packages (core, react) and examples
 - **@trace-viz/core**: Core orchestration logic - TraceOrchestrator, VisualizerRegistry, version detection, transformers
 - **@trace-viz/react**: React hooks and components built on top of core
-- **Build tool**: tsup for bundling ESM modules
+- **Build tool**: tsdown for bundling ESM modules
 - **Key concepts**: Version detection → Transformation → Visualization pipeline
 
 ## Code Style
