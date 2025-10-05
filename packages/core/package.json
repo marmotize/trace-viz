@@ -1,6 +1,6 @@
 {
   "name": "@trace-viz/core",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Core trace visualization orchestration library",
   "keywords": [
     "trace",
