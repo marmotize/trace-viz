@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  matrix-checks:
+    name: Node ${{ matrix.node-version }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -42,3 +43,16 @@ jobs:
 
       - name: Pack dry run
         run: pnpm pack:dry
+
+  test:
+    name: test
+    needs: matrix-checks
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Verify matrix status
+        run: |
+          if [ "${{ needs.matrix-checks.result }}" != "success" ]; then
+            echo "Required matrix jobs failed"
+            exit 1
+          fi
