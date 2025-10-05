@@ -13,7 +13,7 @@ export class TraceOrchestrator<T = unknown> {
   private registry: VisualizerRegistry;
   private operationId = 0;
 
-  constructor(private config: OrchestratorConfig) {
+  constructor(private config: OrchestratorConfig<T>) {
     this.state = {
       error: null,
       rawTrace: null,
