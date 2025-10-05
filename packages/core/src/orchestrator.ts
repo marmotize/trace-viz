@@ -79,24 +79,22 @@ export class TraceOrchestrator<T = unknown> {
       // Detect version
       const version = this.config.versionDetector.detect(rawTrace);
 
-      // Transform if needed
-      let processedTrace: unknown = rawTrace;
-      if (this.config.autoTransform && this.config.transformer) {
-        if (this.config.transformer.canTransform(version)) {
-          processedTrace = await this.config.transformer.transform(
-            rawTrace,
-            version,
-          );
-        }
-      }
-
       // Get visualizer
       const visualizer = this.registry.get(version);
+
+      // Prepare trace for visualization
+      let preparedTrace: unknown = rawTrace;
+      if (this.config.preparer) {
+        preparedTrace = await this.config.preparer.prepare(rawTrace, {
+          version,
+          visualizer,
+        });
+      }
 
       this.updateState({
         error: null,
         status: 'success',
-        trace: processedTrace as T,
+        trace: preparedTrace as T,
         version,
         visualizer,
       });

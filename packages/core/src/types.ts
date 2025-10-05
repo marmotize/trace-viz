@@ -34,27 +34,23 @@ export interface VersionDetector {
 }
 
 /**
- * Transformer interface for converting between versions
+ * Preparer interface for transforming raw trace into visualization-ready format
  */
-export interface Transformer {
-  canTransform(fromVersion: Version): boolean;
-  transform(trace: RawTrace, fromVersion: Version): Promise<unknown> | unknown;
+export interface TracePreparer<T = unknown> {
+  prepare(
+    trace: RawTrace,
+    ctx: { version: Version; visualizer?: VisualizerComponent | string },
+  ): Promise<T> | T;
 }
 
 /**
  * Orchestrator configuration
  */
-export interface OrchestratorConfig {
+export interface OrchestratorConfig<T = unknown> {
   /**
-   * Whether to automatically transform to latest version
-   * Default: false (keep original version)
+   * Optional preparer for transforming trace data for visualization
    */
-  autoTransform?: boolean;
-
-  /**
-   * Optional transformer for migrating between versions
-   */
-  transformer?: Transformer;
+  preparer?: TracePreparer<T>;
 
   /**
    * Version detector to extract version from raw trace

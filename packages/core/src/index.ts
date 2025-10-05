@@ -10,7 +10,7 @@ export type {
   VisualizerComponent,
   StateSubscriber,
   VersionDetector,
-  Transformer,
+  TracePreparer,
   OrchestratorConfig,
 } from './types.js';
 
