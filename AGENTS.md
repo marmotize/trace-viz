@@ -44,3 +44,12 @@
   - Run `pnpm format` to ensure proper formatting (Prettier adds blank lines between Mermaid code blocks)
   - Keep architecture diagrams and documentation in sync with code changes
   - Update usage examples if APIs change
+
+## Git Workflow
+
+- **NEVER commit directly to main**: Always use feature branches
+  1. Create a branch: `git checkout -b <branch-name>`
+  2. Make changes and commit
+  3. Push the branch using GitHub MCP
+  4. Create a PR using GitHub MCP tools
+- **Branch naming**: Use conventional format (feat/, fix/, chore/, docs/, etc.)
