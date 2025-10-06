@@ -120,13 +120,12 @@ export function App() {
     versionDetector,
   });
 
-  // Register visualizers
+  // Register visualizers (re-register when orchestrator changes)
   useEffect(() => {
     registerVisualizer({ component: TraceViewerV1, version: '1' });
     registerVisualizer({ component: TraceViewerV2, version: '2' });
     setReady(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [registerVisualizer]);
 
   const handleLoadTrace = (traceVersion: 'v1' | 'v2') => {
     setSelectedTrace(traceVersion);
