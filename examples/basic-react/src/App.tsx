@@ -6,94 +6,127 @@ import {
   type TraceV1,
   type TraceV2,
 } from '@trace-viz/react';
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  invalidV2Trace,
+  sampleTraceV1,
+  sampleTraceV2,
+  traceNoVersion,
+  traceV2_1_3,
+  traceV2_9_0,
+} from './test-presets';
 import { TraceViewerV1 } from './visualizers/TraceViewerV1';
 import { TraceViewerV2 } from './visualizers/TraceViewerV2';
 
-const preparer: TracePreparer<TraceV1 | TraceV2> = {
-  prepare(trace, { version }) {
-    if (version === '1') {
-      return TraceV1Schema.parse(trace);
-    }
-    if (version === '2') {
-      return TraceV2Schema.parse(trace);
-    }
-    return trace as TraceV1 | TraceV2;
-  },
-};
-
-// Sample trace data
-const sampleTraceV1 = {
-  spans: [
-    {
-      endTime: 1500,
-      name: 'Main Operation',
-      spanId: 'span-1',
-      startTime: 1000,
-    },
-    {
-      endTime: 1400,
-      name: 'Sub Operation',
-      parentId: 'span-1',
-      spanId: 'span-2',
-      startTime: 1100,
-    },
-  ],
-  timestamp: Date.now(),
-  traceId: 'trace-001',
-  version: '1',
-};
-
-const sampleTraceV2 = {
-  metadata: {
-    environment: 'production',
-    user: 'test-user',
-  },
-  spans: [
-    {
-      endTime: 2000,
-      llm: {
-        input: { prompt: 'Hello, world!' },
-        model: 'gpt-4',
-        output: { response: 'Hi there!' },
-        provider: 'openai',
-      },
-      name: 'LLM Call',
-      spanId: 'span-1',
-      startTime: 1000,
-    },
-  ],
-  timestamp: Date.now(),
-  traceId: 'trace-002',
-  version: '2',
-};
-
 export function App() {
   const [selectedTrace, setSelectedTrace] = useState<'v1' | 'v2'>('v1');
+  const [expression, setExpression] = useState('version');
+  const [fallback, setFallback] = useState('1');
+  const [preparerEnabled, setPreparerEnabled] = useState(true);
+  const [preparerDelayEnabled, setPreparerDelayEnabled] = useState(false);
+  const [preparerDelayMs, setPreparerDelayMs] = useState(0);
+  const [customTrace, setCustomTrace] = useState('');
+  const [ready, setReady] = useState(false);
+
+  const isTestMode = window.location.search.includes('test=1');
+
+  // Refs to track latest preparer control values
+  const preparerEnabledRef = useRef(preparerEnabled);
+  const preparerDelayEnabledRef = useRef(preparerDelayEnabled);
+  const preparerDelayMsRef = useRef(preparerDelayMs);
+
+  useEffect(() => {
+    preparerEnabledRef.current = preparerEnabled;
+  }, [preparerEnabled]);
+
+  useEffect(() => {
+    preparerDelayEnabledRef.current = preparerDelayEnabled;
+  }, [preparerDelayEnabled]);
+
+  useEffect(() => {
+    preparerDelayMsRef.current = preparerDelayMs;
+  }, [preparerDelayMs]);
+
+  // Auto-enable delay in test mode for deterministic processing state
+  useEffect(() => {
+    if (isTestMode) {
+      setPreparerDelayEnabled(true);
+      setPreparerDelayMs(150);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const preparer: TracePreparer<TraceV1 | TraceV2> = useMemo(
+    () => ({
+      prepare: async (trace, { version }) => {
+        // Read latest control values from refs
+        if (!preparerEnabledRef.current) {
+          return trace as TraceV1 | TraceV2;
+        }
+
+        if (preparerDelayEnabledRef.current && preparerDelayMsRef.current > 0) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, preparerDelayMsRef.current),
+          );
+        }
+
+        // Prefer version from trace itself, fall back to detected version
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const traceVersionRaw = (trace as any)?.version;
+        const effectiveVersion =
+          traceVersionRaw !== undefined &&
+          traceVersionRaw !== null &&
+          String(traceVersionRaw) !== ''
+            ? String(traceVersionRaw)
+            : version;
+
+        if (effectiveVersion === '1') {
+          const normalized = { ...trace, version: '1' };
+          return TraceV1Schema.parse(normalized);
+        }
+        if (effectiveVersion === '2' || effectiveVersion?.startsWith('2.')) {
+          const normalized = { ...trace, version: '2' };
+          return TraceV2Schema.parse(normalized);
+        }
+        return trace as TraceV1 | TraceV2;
+      },
+    }),
+    [],
+  );
+
+  const versionDetector = useMemo(
+    () =>
+      new JSONataVersionDetector({
+        expression,
+        fallback,
+      }),
+    [expression, fallback],
+  );
 
   const {
+    clearVisualizers,
     error,
     isError,
     isProcessing,
     isSuccess,
     process,
     registerVisualizer,
+    setDefaultVisualizer,
     trace,
     version,
     visualizer: Visualizer,
   } = useTrace<TraceV1 | TraceV2>({
     preparer,
-    versionDetector: new JSONataVersionDetector({
-      expression: 'version',
-      fallback: '1',
-    }),
+    versionDetector,
   });
 
   // Register visualizers
-  useState(() => {
+  useEffect(() => {
     registerVisualizer({ component: TraceViewerV1, version: '1' });
     registerVisualizer({ component: TraceViewerV2, version: '2' });
-  });
+    setReady(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLoadTrace = (traceVersion: 'v1' | 'v2') => {
     setSelectedTrace(traceVersion);
@@ -101,12 +134,49 @@ export function App() {
     process({ rawTrace: trace });
   };
 
+  const handleProcessCustom = () => {
+    try {
+      const parsedTrace = JSON.parse(customTrace);
+      process({ rawTrace: parsedTrace });
+    } catch {
+      // Invalid JSON - silently ignore
+    }
+  };
+
+  const handleRegister21 = () => {
+    registerVisualizer({ component: TraceViewerV2, version: '2.1' });
+  };
+
+  const handleClearRegistry = () => {
+    clearVisualizers();
+  };
+
+  const handleSetDefault = () => {
+    setDefaultVisualizer({ component: TraceViewerV1 });
+  };
+
+  const handlePreset = (preset: string) => {
+    const presets: Record<string, Record<string, unknown>> = {
+      'invalid-v2': invalidV2Trace,
+      'no-version': traceNoVersion,
+      'v2-9-0': traceV2_9_0,
+      'v21-3': traceV2_1_3,
+    };
+    if (presets[preset]) {
+      process({ rawTrace: presets[preset] });
+    }
+  };
+
   return (
     <div style={{ margin: '0 auto', maxWidth: '1200px', padding: '40px' }}>
+      {isTestMode && ready && (
+        <div data-testid="app-ready" style={{ display: 'none' }} />
+      )}
       <h1>Trace Visualization Library - v0 Demo</h1>
 
       <div style={{ marginTop: '20px' }}>
         <button
+          data-testid="btn-v1"
           onClick={() => handleLoadTrace('v1')}
           style={{
             background: selectedTrace === 'v1' ? '#3b82f6' : '#e5e7eb',
@@ -122,6 +192,7 @@ export function App() {
         </button>
 
         <button
+          data-testid="btn-v2"
           onClick={() => handleLoadTrace('v2')}
           style={{
             background: selectedTrace === 'v2' ? '#10b981' : '#e5e7eb',
@@ -136,11 +207,242 @@ export function App() {
         </button>
       </div>
 
+      {isTestMode && (
+        <div
+          style={{
+            background: '#f0f0f0',
+            borderRadius: '8px',
+            marginTop: '20px',
+            padding: '20px',
+          }}
+        >
+          <h3>🧪 Test Panel</h3>
+
+          <div style={{ marginBottom: '15px' }}>
+            <strong>Version Detection:</strong>
+            <div style={{ marginTop: '5px' }}>
+              <label>
+                JSONata Expression:{' '}
+                <input
+                  data-testid="control-expression"
+                  onChange={(e) => setExpression(e.target.value)}
+                  style={{ marginLeft: '5px', padding: '5px', width: '200px' }}
+                  type="text"
+                  value={expression}
+                />
+              </label>
+            </div>
+            <div style={{ marginTop: '5px' }}>
+              <label>
+                Fallback Version:{' '}
+                <input
+                  data-testid="control-fallback"
+                  onChange={(e) => setFallback(e.target.value)}
+                  style={{ marginLeft: '5px', padding: '5px', width: '100px' }}
+                  type="text"
+                  value={fallback}
+                />
+              </label>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <strong>Preparer Controls:</strong>
+            <div style={{ marginTop: '5px' }}>
+              <label>
+                <input
+                  checked={preparerEnabled}
+                  data-testid="control-preparer-enabled"
+                  onChange={(e) => setPreparerEnabled(e.target.checked)}
+                  type="checkbox"
+                />{' '}
+                Preparer Enabled
+              </label>
+            </div>
+            <div style={{ marginTop: '5px' }}>
+              <label>
+                <input
+                  checked={preparerDelayEnabled}
+                  data-testid="control-preparer-delay-enabled"
+                  onChange={(e) => setPreparerDelayEnabled(e.target.checked)}
+                  type="checkbox"
+                />{' '}
+                Delay Enabled
+              </label>
+            </div>
+            <div style={{ marginTop: '5px' }}>
+              <label>
+                Delay (ms):{' '}
+                <input
+                  data-testid="control-preparer-delay-ms"
+                  onChange={(e) => setPreparerDelayMs(Number(e.target.value))}
+                  style={{ marginLeft: '5px', padding: '5px', width: '100px' }}
+                  type="number"
+                  value={preparerDelayMs}
+                />
+              </label>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <strong>Registry Controls:</strong>
+            <div style={{ marginTop: '5px' }}>
+              <button
+                data-testid="control-register-2-1"
+                onClick={handleRegister21}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginRight: '10px',
+                  padding: '5px 10px',
+                }}
+              >
+                Register 2.1
+              </button>
+              <button
+                data-testid="control-clear-registry"
+                onClick={handleClearRegistry}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginRight: '10px',
+                  padding: '5px 10px',
+                }}
+              >
+                Clear Registry
+              </button>
+              <button
+                data-testid="control-register-default"
+                onClick={handleSetDefault}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  padding: '5px 10px',
+                }}
+              >
+                Set Default (V1)
+              </button>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <strong>Trace Presets:</strong>
+            <div style={{ marginTop: '5px' }}>
+              <button
+                data-testid="preset-v21-3"
+                onClick={() => handlePreset('v21-3')}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginRight: '5px',
+                  padding: '5px 10px',
+                }}
+              >
+                v2.1.3
+              </button>
+              <button
+                data-testid="preset-v2-9-0"
+                onClick={() => handlePreset('v2-9-0')}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginRight: '5px',
+                  padding: '5px 10px',
+                }}
+              >
+                v2.9.0
+              </button>
+              <button
+                data-testid="preset-no-version"
+                onClick={() => handlePreset('no-version')}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginRight: '5px',
+                  padding: '5px 10px',
+                }}
+              >
+                No Version
+              </button>
+              <button
+                data-testid="preset-invalid-v2"
+                onClick={() => handlePreset('invalid-v2')}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  padding: '5px 10px',
+                }}
+              >
+                Invalid V2
+              </button>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <strong>Custom Trace:</strong>
+            <div style={{ marginTop: '5px' }}>
+              <textarea
+                data-testid="control-custom-trace"
+                onChange={(e) => setCustomTrace(e.target.value)}
+                placeholder='{"version": "2", "spans": [...], ...}'
+                rows={4}
+                style={{
+                  fontFamily: 'monospace',
+                  padding: '5px',
+                  width: '100%',
+                }}
+                value={customTrace}
+              />
+            </div>
+            <button
+              data-testid="control-process-custom"
+              onClick={handleProcessCustom}
+              style={{
+                background: '#3b82f6',
+                border: 'none',
+                borderRadius: '4px',
+                color: 'white',
+                cursor: 'pointer',
+                marginTop: '5px',
+                padding: '8px 15px',
+              }}
+            >
+              Process Custom Trace
+            </button>
+          </div>
+
+          <div style={{ marginTop: '15px' }}>
+            <strong>React State Flags:</strong>
+            <div style={{ marginTop: '5px' }}>
+              <span data-testid="flag-isProcessing">
+                isProcessing: {String(isProcessing)}
+              </span>
+              {' | '}
+              <span data-testid="flag-isSuccess">
+                isSuccess: {String(isSuccess)}
+              </span>
+              {' | '}
+              <span data-testid="flag-isError">isError: {String(isError)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ marginTop: '20px' }}>
-        {isProcessing && <div>Processing trace...</div>}
+        {isProcessing && (
+          <div data-testid="status-processing">Processing trace...</div>
+        )}
 
         {isError && (
           <div
+            data-testid="status-error"
             style={{
               background: '#fee',
               borderRadius: '4px',
@@ -154,6 +456,7 @@ export function App() {
 
         {isSuccess && version && (
           <div
+            data-testid="status-success"
             style={{
               background: '#f0f9ff',
               borderRadius: '4px',
@@ -161,12 +464,13 @@ export function App() {
               padding: '10px',
             }}
           >
-            <strong>Detected Version:</strong> {version}
+            <strong>Detected Version:</strong>{' '}
+            <span data-testid="version">{version}</span>
           </div>
         )}
 
         {isSuccess && Visualizer && trace && (
-          <div style={{ marginTop: '20px' }}>
+          <div data-testid="viz-root" style={{ marginTop: '20px' }}>
             <Visualizer trace={trace} />
           </div>
         )}

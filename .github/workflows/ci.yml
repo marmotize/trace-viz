@@ -40,5 +40,11 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+      - name: Install Playwright
+        run: pnpm --filter basic-react exec playwright install --with-deps chromium
+
+      - name: E2E Tests
+        run: pnpm test:e2e
+
       - name: Pack dry run
         run: pnpm pack:dry

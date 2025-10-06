@@ -69,6 +69,14 @@ export class TraceOrchestrator<T = unknown> {
   }
 
   /**
+   * Clear all registered visualizers
+   */
+  clearVisualizers(): this {
+    this.registry = new VisualizerRegistry();
+    return this;
+  }
+
+  /**
    * Process a raw trace object
    */
   async process(options: ProcessOptions): Promise<void> {
@@ -84,7 +92,7 @@ export class TraceOrchestrator<T = unknown> {
     try {
       // Detect version
       const version =
-        overrideVersion ?? this.config.versionDetector.detect(rawTrace);
+        overrideVersion ?? (await this.config.versionDetector.detect(rawTrace));
 
       // Get visualizer
       const visualizer = forcedVisualizer ?? this.registry.get(version);

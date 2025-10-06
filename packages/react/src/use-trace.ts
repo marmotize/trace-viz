@@ -22,12 +22,17 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
   const orchestrator = useMemo(
     () => new TraceOrchestrator<T>(config),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config.versionDetector],
+    [config.versionDetector, config.preparer],
   );
 
   const [state, setState] = useState<OrchestratorState<T>>(
     orchestrator.getState(),
   );
+
+  useEffect(() => {
+    // Resync state when orchestrator changes
+    setState(orchestrator.getState());
+  }, [orchestrator]);
 
   useEffect(() => {
     const unsubscribe = orchestrator.subscribe(setState);
@@ -60,6 +65,11 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
     [orchestrator],
   );
 
+  const clearVisualizers = useCallback(
+    () => orchestrator.clearVisualizers(),
+    [orchestrator],
+  );
+
   return {
     // State
     state,
@@ -78,6 +88,7 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
     visualizer: state.visualizer,
 
     // Actions
+    clearVisualizers,
     process,
     registerVisualizer,
     reset,
