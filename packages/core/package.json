@@ -48,7 +48,7 @@
   "devDependencies": {
     "tsdown": "^0.15.6",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=20"
