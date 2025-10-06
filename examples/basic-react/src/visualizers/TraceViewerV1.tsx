@@ -3,6 +3,7 @@ import type { TraceV1 } from '@trace-viz/core';
 export function TraceViewerV1({ trace }: { trace: TraceV1 }) {
   return (
     <div
+      data-testid="viz-v1"
       style={{
         border: '2px solid #3b82f6',
         borderRadius: '8px',

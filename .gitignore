@@ -38,6 +38,10 @@ lerna-debug.log*
 
 # Testing
 coverage/
+test-results/
+playwright-report/
+**/test-results.json
+**/flow-results.json
 
 # Temporary files
 *.tmp

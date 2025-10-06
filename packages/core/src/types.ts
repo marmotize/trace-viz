@@ -30,7 +30,7 @@ export type StateSubscriber<T = unknown> = (
  * Version detector interface
  */
 export interface VersionDetector {
-  detect(trace: RawTrace): Version;
+  detect(trace: RawTrace): Version | Promise<Version>;
 }
 
 /**

@@ -21,6 +21,7 @@
     "release:publish": "pnpm -r build && changeset publish",
     "release:version": "changeset version && pnpm install --no-frozen-lockfile",
     "test": "npm-run-all --parallel lint typecheck test:run format:check",
+    "test:e2e": "pnpm --filter basic-react test:e2e",
     "test:run": "pnpm -r test",
     "test:watch": "pnpm -r test",
     "typecheck": "pnpm -r --filter './packages/*' typecheck"
@@ -37,6 +38,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.3",
     "npm-run-all2": "^8.0.4",
+    "playwright": "^1.56.0",
     "prettier": "^3.6.2",
     "prettier-plugin-packagejson": "^2.5.19",
     "tsdown": "^0.15.6",

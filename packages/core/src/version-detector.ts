@@ -34,9 +34,9 @@ export class JSONataVersionDetector implements VersionDetector {
     }
   }
 
-  detect(trace: RawTrace): Version {
+  async detect(trace: RawTrace): Promise<Version> {
     try {
-      const result = this.expression.evaluate(trace);
+      const result = await this.expression.evaluate(trace);
 
       if (result !== null && result !== undefined) {
         if (typeof result === 'string') {
