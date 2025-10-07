@@ -18,6 +18,19 @@ export interface JSONataVersionDetectorConfig {
    * Fallback version if expression returns null/undefined
    */
   fallback?: Version;
+
+  /**
+   * Optional callback invoked whenever version detection fails but a fallback is used.
+   * Useful for surfacing otherwise-silent errors when a fallback is configured.
+   */
+  onError?: (error: Error, context: JSONataVersionDetectorErrorContext) => void;
+}
+
+export interface JSONataVersionDetectorErrorContext {
+  expression: string;
+  fallback?: Version;
+  result?: unknown;
+  trace: RawTrace;
 }
 
 export class JSONataVersionDetector implements VersionDetector {
@@ -48,6 +61,13 @@ export class JSONataVersionDetector implements VersionDetector {
       }
 
       if (this.config.fallback) {
+        this.notifyFailure(
+          new Error(
+            `Version detection returned null or undefined for expression "${this.config.expression}".`,
+          ),
+          trace,
+          result,
+        );
         return this.config.fallback;
       }
 
@@ -56,10 +76,26 @@ export class JSONataVersionDetector implements VersionDetector {
           `returned: ${JSON.stringify(result)}`,
       );
     } catch (error) {
+      const normalizedError =
+        error instanceof Error ? error : new Error(String(error));
       if (this.config.fallback) {
+        this.notifyFailure(normalizedError, trace);
         return this.config.fallback;
       }
-      throw error;
+      throw normalizedError;
     }
+  }
+
+  private notifyFailure(error: Error, trace: RawTrace, result?: unknown): void {
+    if (!this.config.onError) {
+      return;
+    }
+
+    this.config.onError(error, {
+      expression: this.config.expression,
+      fallback: this.config.fallback,
+      result,
+      trace,
+    });
   }
 }

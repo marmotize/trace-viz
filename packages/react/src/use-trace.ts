@@ -6,23 +6,59 @@ import {
   type RawTrace,
   type RegisterVisualizerOptions,
   type SetDefaultVisualizerOptions,
+  type Version,
 } from '@trace-viz/core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export interface UseTraceOptions<T = unknown> extends OrchestratorConfig<T> {
   /**
+   * Default visualizer to configure automatically.
+   */
+  defaultVisualizer?: SetDefaultVisualizerOptions;
+
+  /**
    * Initial trace to process on mount
    */
   initialTrace?: RawTrace;
+
+  /**
+   * Dependencies controlling when a new orchestrator instance is created.
+   * Falls back to `[versionDetector, preparer]` when not provided.
+   */
+  orchestratorDependencies?: ReadonlyArray<unknown>;
+
+  /**
+   * Optional factory for constructing the orchestrator instance.
+   * Useful when callers need full control over instantiation.
+   */
+  orchestratorFactory?: () => TraceOrchestrator<T>;
+
+  /**
+   * Visualizers to register automatically when the orchestrator is created.
+   */
+  visualizers?: Array<RegisterVisualizerOptions>;
 }
 
 export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
-  const { initialTrace, ...config } = options;
+  const {
+    defaultVisualizer,
+    initialTrace,
+    orchestratorDependencies,
+    orchestratorFactory,
+    visualizers,
+    ...config
+  } = options;
 
+  // Orchestrator dependencies can be customized via orchestratorDependencies
   const orchestrator = useMemo(
-    () => new TraceOrchestrator<T>(config),
+    () => {
+      if (orchestratorFactory) {
+        return orchestratorFactory();
+      }
+      return new TraceOrchestrator<T>(config);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config.versionDetector, config.preparer],
+    orchestratorDependencies ?? [config.preparer, config.versionDetector],
   );
 
   const [state, setState] = useState<OrchestratorState<T>>(
@@ -39,12 +75,29 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
     return unsubscribe;
   }, [orchestrator]);
 
-  // Process initial trace on mount
+  const configuredVisualizers = useMemo(() => visualizers ?? [], [visualizers]);
+
+  // Combined effect: apply registry configuration first, then process initialTrace
+  // This prevents a race where initialTrace processing happens before visualizers are registered
   useEffect(() => {
-    if (initialTrace) {
-      orchestrator.process({ rawTrace: initialTrace });
+    // Apply registry first
+    if (configuredVisualizers.length > 0) {
+      // Use replace: true for idempotency
+      const entries = configuredVisualizers.map((entry) => ({
+        ...entry,
+        replace: true,
+      }));
+      orchestrator.registerVisualizerBatch(entries);
     }
-  }, [initialTrace, orchestrator]);
+    if (defaultVisualizer) {
+      orchestrator.setDefaultVisualizer(defaultVisualizer);
+    }
+
+    // Then process initial trace
+    if (initialTrace) {
+      void orchestrator.process({ rawTrace: initialTrace });
+    }
+  }, [orchestrator, configuredVisualizers, defaultVisualizer, initialTrace]);
 
   const process = useCallback(
     (options: ProcessOptions) => orchestrator.process(options),
@@ -70,6 +123,25 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
     [orchestrator],
   );
 
+  const restoreVisualizers = useCallback(() => {
+    orchestrator
+      .clearVisualizers()
+      .registerVisualizerBatch(configuredVisualizers);
+    if (defaultVisualizer) {
+      orchestrator.setDefaultVisualizer(defaultVisualizer);
+    }
+  }, [configuredVisualizers, defaultVisualizer, orchestrator]);
+
+  const getRegisteredVersions = useCallback(
+    () => orchestrator.getRegisteredVersions(),
+    [orchestrator],
+  );
+
+  const hasVisualizer = useCallback(
+    (version: Version) => orchestrator.hasVisualizer(version),
+    [orchestrator],
+  );
+
   return {
     // State
     state,
@@ -89,9 +161,12 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
 
     // Actions
     clearVisualizers,
+    getRegisteredVersions,
+    hasVisualizer,
     process,
     registerVisualizer,
     reset,
+    restoreVisualizers,
     setDefaultVisualizer,
 
     // Orchestrator instance for advanced usage

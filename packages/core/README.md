@@ -44,7 +44,8 @@ orchestrator.registerVisualizer({ version: '2', component: TraceViewerV2 });
 orchestrator.setDefaultVisualizer({ component: DefaultViewer });
 
 // Process trace data
-await orchestrator.process({ rawTrace: traceData });
+const state = await orchestrator.process({ rawTrace: traceData });
+console.log(state.status); // "success"
 
 // Subscribe to state changes
 const unsubscribe = orchestrator.subscribe((state) => {
@@ -113,18 +114,25 @@ Constructor options:
 
 Methods:
 
-- `process(options)`: Process trace data
+- `process(options)`: Process trace data and return the updated orchestrator state
   - `rawTrace`: Trace data to process (required)
   - `overrideVersion`: Optional version to use instead of detection
   - `visualizer`: Optional visualizer component to use instead of registry lookup
 - `registerVisualizer(options)`: Register visualizer for version
   - `version`: Version string (required)
   - `component`: Visualizer component (required)
-- `registerVisualizers(mapping)`: Register multiple visualizers
+- `replace`: Optional flag (defaults to `true`). When `false`, attempting to register an existing version will throw.
+- `registerVisualizerBatch(entries)`: Register an array of visualizer configurations
+- `registerVisualizers(mapping)`: Register multiple visualizers from a record map
 - `setDefaultVisualizer(options)`: Set fallback visualizer
   - `component`: Visualizer component (required)
+- `getRegisteredVersions()`: List of explicitly registered versions
+- `getVisualizer(version)`: Resolve the visualizer that would be used for a version
+- `hasVisualizer(version)`: Check if a visualizer (or default) is available for a version
+- `getDefaultVisualizer()`: Retrieve the configured default visualizer, if any
 - `subscribe(callback)`: Subscribe to state changes
 - `reset()`: Reset to initial state
+- `clearVisualizers()`: Remove all registered and default visualizers
 
 ### `JSONataVersionDetector`
 
@@ -132,6 +140,7 @@ Constructor options:
 
 - `expression`: JSONata expression to extract version
 - `fallback`: Optional fallback version string
+- `onError`: Optional callback invoked when detection fails but a fallback is returned
 
 ## Development
 

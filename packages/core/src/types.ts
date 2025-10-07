@@ -37,6 +37,18 @@ export interface VersionDetector {
  * Preparer interface for transforming raw trace into visualization-ready format
  */
 export interface TracePreparer<T = unknown> {
+  /**
+   * Optional callback invoked when preparation fails.
+   * Useful for logging or debugging preparation errors.
+   */
+  onError?: (
+    error: Error,
+    context: {
+      trace: RawTrace;
+      version: Version;
+      visualizer?: VisualizerComponent | string;
+    },
+  ) => void;
   prepare(
     trace: RawTrace,
     ctx: { version: Version; visualizer?: VisualizerComponent | string },
@@ -80,7 +92,8 @@ export interface RegisterVisualizerOptions {
   component: VisualizerComponent;
   /**
    * Whether to replace existing visualizer for the same version if present.
-   * Default behavior is to replace (to match current semantics).
+   * Defaults to `true`. When set to `false`, attempting to register a version
+   * that already exists will throw.
    */
   replace?: boolean;
   version: Version;
