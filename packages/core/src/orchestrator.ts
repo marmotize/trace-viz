@@ -5,6 +5,7 @@ import type {
   RegisterVisualizerOptions,
   SetDefaultVisualizerOptions,
   StateSubscriber,
+  Version,
   VisualizerComponent,
 } from './types.js';
 import { VisualizerRegistry } from './visualizer-registry.js';
@@ -61,6 +62,14 @@ export class TraceOrchestrator<T = unknown> {
   }
 
   /**
+   * Register a batch of visualizers with explicit options per entry.
+   */
+  registerVisualizerBatch(entries: Array<RegisterVisualizerOptions>): this {
+    entries.forEach((entry) => this.registry.register(entry));
+    return this;
+  }
+
+  /**
    * Set default visualizer
    */
   setDefaultVisualizer(options: SetDefaultVisualizerOptions): this {
@@ -77,9 +86,37 @@ export class TraceOrchestrator<T = unknown> {
   }
 
   /**
+   * List the versions that have visualizers explicitly registered.
+   */
+  getRegisteredVersions(): Array<Version> {
+    return this.registry.getRegisteredVersions();
+  }
+
+  /**
+   * Check if a visualizer is available (including defaults/semantic matches).
+   */
+  hasVisualizer(version: Version): boolean {
+    return this.registry.has(version);
+  }
+
+  /**
+   * Resolve a visualizer for a given version using the registry's matching rules.
+   */
+  getVisualizer(version: Version): VisualizerComponent {
+    return this.registry.get(version);
+  }
+
+  /**
+   * Get the current default visualizer if configured.
+   */
+  getDefaultVisualizer(): VisualizerComponent | undefined {
+    return this.registry.getDefaultVisualizer();
+  }
+
+  /**
    * Process a raw trace object
    */
-  async process(options: ProcessOptions): Promise<void> {
+  async process(options: ProcessOptions): Promise<OrchestratorState<T>> {
     const { overrideVersion, rawTrace, visualizer: forcedVisualizer } = options;
     const currentOp = ++this.operationId;
 
@@ -100,14 +137,28 @@ export class TraceOrchestrator<T = unknown> {
       // Prepare trace for visualization
       let preparedTrace: unknown = rawTrace;
       if (this.config.preparer) {
-        preparedTrace = await this.config.preparer.prepare(rawTrace, {
-          version,
-          visualizer,
-        });
+        try {
+          preparedTrace = await this.config.preparer.prepare(rawTrace, {
+            version,
+            visualizer,
+          });
+        } catch (preparerError) {
+          const normalizedError =
+            preparerError instanceof Error
+              ? preparerError
+              : new Error(String(preparerError));
+          // Invoke preparer's onError callback if available
+          this.config.preparer.onError?.(normalizedError, {
+            trace: rawTrace,
+            version,
+            visualizer,
+          });
+          throw normalizedError;
+        }
       }
 
       if (currentOp !== this.operationId) {
-        return;
+        return this.getState();
       }
 
       this.updateState({
@@ -117,17 +168,19 @@ export class TraceOrchestrator<T = unknown> {
         version,
         visualizer,
       });
+      return this.getState();
     } catch (error) {
       if (currentOp !== this.operationId) {
-        return;
+        return this.getState();
       }
 
+      const normalizedError =
+        error instanceof Error ? error : new Error(String(error));
       this.updateState({
-        error: error instanceof Error ? error : new Error(String(error)),
+        error: normalizedError,
         status: 'error',
-        trace: null,
-        visualizer: null,
       });
+      return this.getState();
     }
   }
 
@@ -145,8 +198,11 @@ export class TraceOrchestrator<T = unknown> {
     });
   }
 
-  private updateState(updates: Partial<OrchestratorState<T>>): void {
+  private updateState(
+    updates: Partial<OrchestratorState<T>>,
+  ): OrchestratorState<T> {
     this.state = { ...this.state, ...updates };
     this.subscribers.forEach((callback) => callback(this.state));
+    return this.state;
   }
 }

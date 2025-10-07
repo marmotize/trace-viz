@@ -13,9 +13,15 @@ export class VisualizerRegistry {
    * Register a visualizer for a specific version
    */
   register(options: RegisterVisualizerOptions): this {
-    const { component, version } = options;
-    // Current behavior is to replace; we keep this as-is regardless of `replace`
-    // but we keep the flag for future use (e.g., throw on duplicates when replace === false).
+    const { component, replace = true, version } = options;
+
+    const hasExactMatch = this.visualizers.has(version);
+    if (hasExactMatch && replace === false) {
+      throw new Error(
+        `Visualizer for version "${version}" already registered. Pass "replace: true" to overwrite.`,
+      );
+    }
+
     this.visualizers.set(version, component);
     return this;
   }
@@ -81,7 +87,21 @@ export class VisualizerRegistry {
    * Get all registered versions
    */
   getVersions(): Array<Version> {
+    return this.getRegisteredVersions();
+  }
+
+  /**
+   * Get all registered versions (exact keys only)
+   */
+  getRegisteredVersions(): Array<Version> {
     return Array.from(this.visualizers.keys());
+  }
+
+  /**
+   * Get the configured default visualizer, if any.
+   */
+  getDefaultVisualizer(): VisualizerComponent | undefined {
+    return this.defaultVisualizer;
   }
 
   private trySemanticMatch(version: Version): VisualizerComponent | null {

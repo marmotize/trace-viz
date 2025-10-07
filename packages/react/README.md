@@ -33,31 +33,33 @@ import { useTrace } from '@trace-viz/react';
 import { JSONataVersionDetector } from '@trace-viz/core';
 
 function TraceViewer({ traceData }) {
-  const { state, process, registerVisualizer, setDefaultVisualizer } = useTrace(
-    {
-      versionDetector: new JSONataVersionDetector({
-        expression: 'version',
-        fallback: '1',
-      }),
-    },
-  );
+  const { state, process, restoreVisualizers } = useTrace({
+    versionDetector: new JSONataVersionDetector({
+      expression: 'version',
+      fallback: '1',
+    }),
+    visualizers: [
+      { version: '1', component: TraceViewerV1 },
+      { version: '2', component: TraceViewerV2 },
+    ],
+    defaultVisualizer: { component: DefaultViewer },
+  });
 
-  // Register visualizers on mount
-  useEffect(() => {
-    registerVisualizer({ version: '1', component: TraceViewerV1 });
-    registerVisualizer({ version: '2', component: TraceViewerV2 });
-    setDefaultVisualizer({ component: DefaultViewer });
-  }, [registerVisualizer, setDefaultVisualizer]);
-
-  // Process trace data
   useEffect(() => {
     if (traceData) {
-      process({ rawTrace: traceData });
+      void process({ rawTrace: traceData });
     }
   }, [traceData, process]);
 
   if (state.status === 'processing') return <div>Loading...</div>;
-  if (state.status === 'error') return <div>Error: {state.error?.message}</div>;
+  if (state.status === 'error') {
+    return (
+      <div>
+        Error: {state.error?.message}{' '}
+        <button onClick={restoreVisualizers}>Restore visualizers</button>
+      </div>
+    );
+  }
   if (state.status === 'success' && state.visualizer) {
     const Visualizer = state.visualizer;
     return <Visualizer trace={state.trace} />;
@@ -74,17 +76,14 @@ import { JSONataVersionDetector } from '@trace-viz/core';
 import { useTrace } from '@trace-viz/react';
 
 function TraceViewer() {
-  const { state, registerVisualizer } = useTrace({
+  const { state } = useTrace({
     versionDetector: new JSONataVersionDetector({
       expression: 'version',
       fallback: '1',
     }),
     initialTrace: myTraceData, // Process on mount
+    visualizers: [{ version: '1', component: TraceViewerV1 }],
   });
-
-  useEffect(() => {
-    registerVisualizer({ version: '1', component: TraceViewerV1 });
-  }, [registerVisualizer]);
 
   // Trace is automatically processed on mount
   // ...
@@ -157,11 +156,15 @@ Hook options:
 - `versionDetector`: Version detector instance (required)
 - `preparer`: Optional trace preparer for transformation
 - `initialTrace`: Optional trace to process on mount
+- `visualizers`: Optional array of visualizers to register declaratively
+- `defaultVisualizer`: Optional fallback visualizer configuration
+- `orchestratorFactory`: Optional factory function to construct a custom `TraceOrchestrator`
+- `orchestratorDependencies`: Optional dependency list controlling when a new orchestrator instance is created
 
 Returns:
 
 - `state`: Current orchestrator state (`{ status, trace, version, visualizer, error }`)
-- `process(options)`: Function to process trace data
+- `process(options)`: Function to process trace data (returns a promise that resolves to the latest state)
   - `rawTrace`: Trace data to process (required)
   - `overrideVersion`: Optional version to use instead of detection
   - `visualizer`: Optional visualizer component to use instead of registry lookup
@@ -171,6 +174,10 @@ Returns:
   - `component`: Visualizer component (required)
 - `setDefaultVisualizer(options)`: Set default/fallback visualizer
   - `component`: Visualizer component (required)
+- `restoreVisualizers()`: Reapply declaratively configured visualizers and default fallback
+- `clearVisualizers()`: Remove all registered visualizers
+- `getRegisteredVersions()`: Retrieve the currently registered version identifiers
+- `hasVisualizer(version)`: Check if a visualizer or default exists for the given version
 - `orchestrator`: Direct access to TraceOrchestrator instance
 
 ## Development

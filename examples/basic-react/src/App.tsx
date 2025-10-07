@@ -26,6 +26,7 @@ export function App() {
   const [preparerDelayEnabled, setPreparerDelayEnabled] = useState(false);
   const [preparerDelayMs, setPreparerDelayMs] = useState(0);
   const [customTrace, setCustomTrace] = useState('');
+  const [customTraceError, setCustomTraceError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   const isTestMode = window.location.search.includes('test=1');
@@ -103,6 +104,14 @@ export function App() {
     [expression, fallback],
   );
 
+  const defaultVisualizersConfig = useMemo(
+    () => [
+      { component: TraceViewerV1, version: '1' },
+      { component: TraceViewerV2, version: '2' },
+    ],
+    [],
+  );
+
   const {
     clearVisualizers,
     error,
@@ -111,34 +120,43 @@ export function App() {
     isSuccess,
     process,
     registerVisualizer,
+    restoreVisualizers,
     setDefaultVisualizer,
     trace,
     version,
     visualizer: Visualizer,
   } = useTrace<TraceV1 | TraceV2>({
+    defaultVisualizer: { component: TraceViewerV1 },
     preparer,
     versionDetector,
+    visualizers: defaultVisualizersConfig,
   });
 
-  // Register visualizers (re-register when orchestrator changes)
   useEffect(() => {
-    registerVisualizer({ component: TraceViewerV1, version: '1' });
-    registerVisualizer({ component: TraceViewerV2, version: '2' });
     setReady(true);
-  }, [registerVisualizer]);
+  }, []);
 
   const handleLoadTrace = (traceVersion: 'v1' | 'v2') => {
+    setCustomTraceError(null);
     setSelectedTrace(traceVersion);
     const trace = traceVersion === 'v1' ? sampleTraceV1 : sampleTraceV2;
     process({ rawTrace: trace });
   };
 
   const handleProcessCustom = () => {
+    if (!customTrace.trim()) {
+      setCustomTraceError('Provide a JSON trace before processing.');
+      return;
+    }
+
     try {
       const parsedTrace = JSON.parse(customTrace);
+      setCustomTraceError(null);
       process({ rawTrace: parsedTrace });
-    } catch {
-      // Invalid JSON - silently ignore
+    } catch (error) {
+      setCustomTraceError(
+        error instanceof Error ? error.message : 'Invalid JSON input',
+      );
     }
   };
 
@@ -148,6 +166,10 @@ export function App() {
 
   const handleClearRegistry = () => {
     clearVisualizers();
+  };
+
+  const handleRestoreDefaults = () => {
+    restoreVisualizers();
   };
 
   const handleSetDefault = () => {
@@ -313,6 +335,19 @@ export function App() {
                 Clear Registry
               </button>
               <button
+                data-testid="control-restore-defaults"
+                onClick={handleRestoreDefaults}
+                style={{
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  marginRight: '10px',
+                  padding: '5px 10px',
+                }}
+              >
+                Restore Defaults
+              </button>
+              <button
                 data-testid="control-register-default"
                 onClick={handleSetDefault}
                 style={{
@@ -389,10 +424,14 @@ export function App() {
             <div style={{ marginTop: '5px' }}>
               <textarea
                 data-testid="control-custom-trace"
-                onChange={(e) => setCustomTrace(e.target.value)}
+                onChange={(e) => {
+                  setCustomTrace(e.target.value);
+                  setCustomTraceError(null);
+                }}
                 placeholder='{"version": "2", "spans": [...], ...}'
                 rows={4}
                 style={{
+                  border: customTraceError ? '1px solid #ef4444' : undefined,
                   fontFamily: 'monospace',
                   padding: '5px',
                   width: '100%',
@@ -415,6 +454,17 @@ export function App() {
             >
               Process Custom Trace
             </button>
+            {customTraceError && (
+              <div
+                data-testid="custom-trace-error"
+                style={{
+                  color: '#dc2626',
+                  marginTop: '8px',
+                }}
+              >
+                Unable to process trace: {customTraceError}
+              </div>
+            )}
           </div>
 
           <div style={{ marginTop: '15px' }}>

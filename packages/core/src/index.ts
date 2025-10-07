@@ -17,7 +17,10 @@ export type {
   VisualizerComponent,
 } from './types.js';
 
-export type { JSONataVersionDetectorConfig } from './version-detector.js';
+export type {
+  JSONataVersionDetectorConfig,
+  JSONataVersionDetectorErrorContext,
+} from './version-detector.js';
 
 // Re-export schema utilities for convenience
 export * from './schemas/index.js';
