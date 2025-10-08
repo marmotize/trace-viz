@@ -1,4 +1,3 @@
-import { TraceV1Schema, TraceV2Schema } from '@trace-viz/core';
 import {
   JSONataVersionDetector,
   useTrace,
@@ -82,12 +81,10 @@ export function App() {
             : version;
 
         if (effectiveVersion === '1') {
-          const normalized = { ...trace, version: '1' };
-          return TraceV1Schema.parse(normalized);
+          return { ...trace, version: '1' } as TraceV1;
         }
         if (effectiveVersion === '2' || effectiveVersion?.startsWith('2.')) {
-          const normalized = { ...trace, version: '2' };
-          return TraceV2Schema.parse(normalized);
+          return { ...trace, version: '2' } as TraceV2;
         }
         return trace as TraceV1 | TraceV2;
       },
