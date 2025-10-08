@@ -2,8 +2,11 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Concurrency and Abandonment Coverage', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/?test=1');
-    await expect(page.getByTestId('app-ready')).toBeAttached();
+    await page.goto('/?test=1', { waitUntil: 'domcontentloaded' });
+    await page.getByTestId('app-ready').waitFor({
+      state: 'attached',
+      timeout: process.env.CI ? 60_000 : 10_000,
+    });
   });
 
   test('concurrency-abandon-stale: Later operation wins', async ({ page }) => {

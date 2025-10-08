@@ -68,6 +68,10 @@ jobs:
         if: matrix.primary
         run: pnpm --filter trace-viz-example exec playwright install --with-deps chromium
 
+      - name: Build example app for E2E
+        if: matrix.primary
+        run: pnpm --filter trace-viz-example build
+
       - name: E2E Tests
         if: matrix.primary
         run: pnpm --filter trace-viz-example test:e2e
