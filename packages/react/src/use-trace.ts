@@ -1,14 +1,19 @@
 import {
   TraceOrchestrator,
   type OrchestratorConfig,
-  type OrchestratorState,
   type ProcessOptions,
   type RawTrace,
   type RegisterVisualizerOptions,
   type SetDefaultVisualizerOptions,
   type Version,
 } from '@trace-viz/core';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 
 export interface UseTraceOptions<T = unknown> extends OrchestratorConfig<T> {
   /**
@@ -61,28 +66,19 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
     orchestratorDependencies ?? [config.preparer, config.versionDetector],
   );
 
-  const [state, setState] = useState<OrchestratorState<T>>(
-    orchestrator.getState(),
+  const state = useSyncExternalStore(
+    useCallback(
+      (onStoreChange) => orchestrator.subscribe(onStoreChange),
+      [orchestrator],
+    ),
+    useCallback(() => orchestrator.getState(), [orchestrator]),
+    useCallback(() => orchestrator.getState(), [orchestrator]),
   );
-
-  useEffect(() => {
-    // Resync state when orchestrator changes
-    setState(orchestrator.getState());
-  }, [orchestrator]);
-
-  useEffect(() => {
-    const unsubscribe = orchestrator.subscribe(setState);
-    return unsubscribe;
-  }, [orchestrator]);
 
   const configuredVisualizers = useMemo(() => visualizers ?? [], [visualizers]);
 
-  // Combined effect: apply registry configuration first, then process initialTrace
-  // This prevents a race where initialTrace processing happens before visualizers are registered
   useEffect(() => {
-    // Apply registry first
     if (configuredVisualizers.length > 0) {
-      // Use replace: true for idempotency
       const entries = configuredVisualizers.map((entry) => ({
         ...entry,
         replace: true,
@@ -92,12 +88,20 @@ export function useTrace<T = unknown>(options: UseTraceOptions<T>) {
     if (defaultVisualizer) {
       orchestrator.setDefaultVisualizer(defaultVisualizer);
     }
+  }, [orchestrator, configuredVisualizers, defaultVisualizer]);
 
-    // Then process initial trace
-    if (initialTrace) {
+  const didProcessInitialTrace = useRef(false);
+
+  useEffect(() => {
+    didProcessInitialTrace.current = false;
+  }, [orchestrator]);
+
+  useEffect(() => {
+    if (!didProcessInitialTrace.current && initialTrace) {
+      didProcessInitialTrace.current = true;
       void orchestrator.process({ rawTrace: initialTrace });
     }
-  }, [orchestrator, configuredVisualizers, defaultVisualizer, initialTrace]);
+  }, [orchestrator, initialTrace]);
 
   const process = useCallback(
     (options: ProcessOptions) => orchestrator.process(options),
