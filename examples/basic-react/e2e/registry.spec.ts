@@ -5,7 +5,7 @@ test.describe('Registry Lookup Coverage', () => {
     await page.goto('/?test=1', { waitUntil: 'domcontentloaded' });
     await page.getByTestId('app-ready').waitFor({
       state: 'attached',
-      timeout: process.env.CI ? 60_000 : 10_000,
+      timeout: process.env.CI ? 15_000 : 10_000,
     });
   });
 
