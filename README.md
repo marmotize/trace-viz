@@ -2,6 +2,18 @@
 
 Trace visualization monorepo with automatic version detection and transformation.
 
+## Published Packages & Deployment Badges
+
+These packages are published to npm and can be surfaced directly in GitHub README or deployment pages through badges. The badges below always display the latest published version, making it easy to showcase deployments at a glance.
+
+| Package                                                                                                    | Latest Version                                                                    | Description                                                                      |
+| ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [`@trace-viz/core`](https://www.npmjs.com/package/@trace-viz/core)                                         | ![npm (scoped)](https://img.shields.io/npm/v/@trace-viz/core)                     | Core trace orchestration, version detection, and visualization registry tooling. |
+| [`@trace-viz/version-detector-jsonata`](https://www.npmjs.com/package/@trace-viz/version-detector-jsonata) | ![npm (scoped)](https://img.shields.io/npm/v/@trace-viz/version-detector-jsonata) | JSONata-powered version detector used by the orchestrator pipeline.              |
+| [`@trace-viz/react`](https://www.npmjs.com/package/@trace-viz/react)                                       | ![npm (scoped)](https://img.shields.io/npm/v/@trace-viz/react)                    | React bindings, hooks, and components for rendering orchestrated traces.         |
+
+> **Tip:** To feature these packages in GitHub deployments, pin this section (or individual badges) to your project README, release notes, or deployment dashboards so the latest npm release metadata is always visible.
+
 ## Architecture
 
 ### Processing Pipeline Overview
