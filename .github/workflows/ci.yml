@@ -12,6 +12,11 @@ jobs:
     strategy:
       matrix:
         node-version: ['20.19', '22']
+        include:
+          - node-version: '20.19'
+            primary: true
+          - node-version: '22'
+            primary: false
     steps:
       - uses: actions/checkout@v5
 
@@ -29,25 +34,32 @@ jobs:
         run: pnpm build
 
       - name: Lint
+        if: matrix.primary
         run: pnpm lint
 
       - name: Type check
+        if: matrix.primary
         run: pnpm typecheck
 
       - name: Test
         run: pnpm test:run
 
       - name: Coverage
+        if: matrix.primary
         run: pnpm coverage
 
       - name: Format check
+        if: matrix.primary
         run: pnpm format:check
 
       - name: Install Playwright
+        if: matrix.primary
         run: pnpm --filter basic-react exec playwright install --with-deps chromium
 
       - name: E2E Tests
+        if: matrix.primary
         run: pnpm test:e2e
 
       - name: Pack dry run
+        if: matrix.primary
         run: pnpm pack:dry
