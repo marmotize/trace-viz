@@ -1,3 +1,5 @@
+import type { useTrace } from '@trace-viz/react';
+
 export interface SpanBase {
   attributes?: Record<string, unknown>;
   endTime: number;
@@ -30,3 +32,5 @@ export interface TraceV2 {
   traceId: string;
   version: '2';
 }
+
+export type UseTraceResult = ReturnType<typeof useTrace<TraceV1 | TraceV2>>;

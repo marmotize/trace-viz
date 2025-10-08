@@ -19,7 +19,9 @@ test.describe('Complete Orchestration Flow - Happy Paths', () => {
 
     // Verify correct visualizer rendered
     await expect(page.getByTestId('viz-v1')).toBeVisible();
-    await expect(page.getByTestId('viz-v1')).toContainText('Main Operation');
+    await expect(page.getByTestId('viz-v1')).toContainText(
+      'HTTP GET /api/users',
+    );
 
     // Verify no error
     await expect(page.getByTestId('flag-isError')).toContainText('false');
@@ -38,7 +40,7 @@ test.describe('Complete Orchestration Flow - Happy Paths', () => {
 
     // Verify correct visualizer rendered
     await expect(page.getByTestId('viz-v2')).toBeVisible();
-    await expect(page.getByTestId('viz-v2')).toContainText('LLM Call');
+    await expect(page.getByTestId('viz-v2')).toContainText('LLM Completion');
 
     // Verify no error
     await expect(page.getByTestId('flag-isError')).toContainText('false');

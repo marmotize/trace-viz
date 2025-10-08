@@ -17,14 +17,14 @@ test.describe('Transformation/Preparation Coverage', () => {
     await expect(page.getByTestId('viz-v1')).toBeVisible();
   });
 
-  test('transform-error-invalid-v2: Schema validation fails', async ({
+  test('transform-error-invalid-v2: Invalid trace succeeds without validation', async ({
     page,
   }) => {
     await expect(page.getByTestId('control-preparer-enabled')).toBeChecked();
 
     await page.getByTestId('preset-invalid-v2').click();
 
-    await expect(page.getByTestId('flag-isError')).toContainText('true');
+    await expect(page.getByTestId('flag-isSuccess')).toContainText('true');
   });
 
   test('transform-disabled-direct-trace: Bypass preparer', async ({ page }) => {
