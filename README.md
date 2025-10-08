@@ -219,7 +219,6 @@ sequenceDiagram
     rect rgb(15, 52, 96)
         Note over Orch: Visualizer Found
         Orch->>Prep: prepare(rawTrace, {version, visualizer})
-        Prep->>Prep: Validate with Zod schema
         Prep->>Prep: Transform structure
         Prep-->>Orch: preparedTrace (typed)
     end
