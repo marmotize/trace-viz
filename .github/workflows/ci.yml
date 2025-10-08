@@ -54,11 +54,11 @@ jobs:
 
       - name: Install Playwright
         if: matrix.primary
-        run: pnpm --filter basic-react exec playwright install --with-deps chromium
+        run: pnpm --filter trace-viz-example exec playwright install --with-deps chromium
 
       - name: E2E Tests
         if: matrix.primary
-        run: pnpm test:e2e
+        run: pnpm --filter trace-viz-example test:e2e
 
       - name: Pack dry run
         if: matrix.primary
