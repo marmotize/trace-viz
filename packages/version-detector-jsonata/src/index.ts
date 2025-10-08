@@ -1,5 +1,5 @@
+import type { RawTrace, Version, VersionDetector } from '@trace-viz/core';
 import jsonata from 'jsonata';
-import type { RawTrace, Version, VersionDetector } from './types.js';
 
 export interface JSONataVersionDetectorConfig {
   /**

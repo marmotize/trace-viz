@@ -1,8 +1,5 @@
-import {
-  JSONataVersionDetector,
-  useTrace,
-  type TracePreparer,
-} from '@trace-viz/react';
+import { useTrace, type TracePreparer } from '@trace-viz/react';
+import { JSONataVersionDetector } from '@trace-viz/version-detector-jsonata';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   invalidV2Trace,

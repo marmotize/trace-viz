@@ -247,8 +247,9 @@ sequenceDiagram
 
 ## Packages
 
-- **[@trace-viz/core](packages/core)**: Core orchestration library for trace visualization
+- **[@trace-viz/core](packages/core)**: Core orchestration library for trace visualization (dependency-free)
 - **[@trace-viz/react](packages/react)**: React hooks and components for trace visualization
+- **[@trace-viz/version-detector-jsonata](packages/version-detector-jsonata)**: JSONata-based version detector plugin
 
 ## Development
 

@@ -1,19 +1,21 @@
 {
-  "name": "@trace-viz/core",
+  "name": "@trace-viz/version-detector-jsonata",
   "version": "0.1.0",
-  "description": "Core trace visualization orchestration library",
+  "description": "JSONata-based version detector plugin for trace-viz",
   "keywords": [
     "trace",
-    "visualization"
+    "visualization",
+    "jsonata",
+    "version-detector"
   ],
-  "homepage": "https://github.com/marmotize/trace-viz/tree/main/packages/core#readme",
+  "homepage": "https://github.com/marmotize/trace-viz/tree/main/packages/version-detector-jsonata#readme",
   "bugs": {
     "url": "https://github.com/marmotize/trace-viz/issues"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/marmotize/trace-viz.git",
-    "directory": "packages/core"
+    "directory": "packages/version-detector-jsonata"
   },
   "license": "MIT",
   "sideEffects": false,
@@ -42,11 +44,18 @@
     "test:cov": "vitest --run --coverage",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "jsonata": "^2.0.3"
+  },
   "devDependencies": {
+    "@trace-viz/core": "workspace:*",
     "@vitest/coverage-v8": "^3.2.4",
     "tsdown": "^0.15.6",
     "typescript": "^5.3.3",
     "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@trace-viz/core": "^0.1.0"
   },
   "engines": {
     "node": ">=20"

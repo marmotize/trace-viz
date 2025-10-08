@@ -1,6 +1,5 @@
 export { TraceOrchestrator } from './orchestrator.js';
 export { VisualizerRegistry } from './visualizer-registry.js';
-export { JSONataVersionDetector } from './version-detector.js';
 
 export type {
   OrchestratorConfig,
@@ -16,8 +15,3 @@ export type {
   VersionDetector,
   VisualizerComponent,
 } from './types.js';
-
-export type {
-  JSONataVersionDetectorConfig,
-  JSONataVersionDetectorErrorContext,
-} from './version-detector.js';

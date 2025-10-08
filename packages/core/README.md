@@ -6,7 +6,8 @@ Core orchestration library for trace visualization with automatic version detect
 
 ## Features
 
-- Automatic version detection for trace data
+- Dependency-free core library
+- Pluggable version detection via VersionDetector interface
 - Pluggable visualizer registry
 - Transformation pipeline for trace data
 - TypeScript-first with full type safety
@@ -28,7 +29,8 @@ pnpm add @trace-viz/core
 ### Basic Setup
 
 ```typescript
-import { JSONataVersionDetector, TraceOrchestrator } from '@trace-viz/core';
+import { TraceOrchestrator } from '@trace-viz/core';
+import { JSONataVersionDetector } from '@trace-viz/version-detector-jsonata';
 
 // Create orchestrator with version detector
 const orchestrator = new TraceOrchestrator({
@@ -60,7 +62,8 @@ const unsubscribe = orchestrator.subscribe((state) => {
 ### With Trace Preparer
 
 ```typescript
-import { JSONataVersionDetector, TraceOrchestrator } from '@trace-viz/core';
+import { TraceOrchestrator } from '@trace-viz/core';
+import { JSONataVersionDetector } from '@trace-viz/version-detector-jsonata';
 
 const orchestrator = new TraceOrchestrator({
   versionDetector: new JSONataVersionDetector({
@@ -134,13 +137,9 @@ Methods:
 - `reset()`: Reset to initial state
 - `clearVisualizers()`: Remove all registered and default visualizers
 
-### `JSONataVersionDetector`
+### Version Detectors
 
-Constructor options:
-
-- `expression`: JSONata expression to extract version
-- `fallback`: Optional fallback version string
-- `onError`: Optional callback invoked when detection fails but a fallback is returned
+The core library provides the `VersionDetector` interface for pluggable version detection. For a ready-to-use JSONata-based implementation, see [@trace-viz/version-detector-jsonata](../version-detector-jsonata).
 
 ## Development
 
