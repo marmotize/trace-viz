@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { JSONataVersionDetector } from '../version-detector.js';
+import { JSONataVersionDetector } from '../index.js';
 
 describe('JSONataVersionDetector', () => {
   describe('happy path', () => {

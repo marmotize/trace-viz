@@ -30,7 +30,7 @@ pnpm add @trace-viz/react react
 ```typescript
 import { useEffect } from 'react';
 import { useTrace } from '@trace-viz/react';
-import { JSONataVersionDetector } from '@trace-viz/core';
+import { JSONataVersionDetector } from '@trace-viz/version-detector-jsonata';
 
 function TraceViewer({ traceData }) {
   const { state, process, restoreVisualizers } = useTrace({
@@ -72,8 +72,8 @@ function TraceViewer({ traceData }) {
 ### With Initial Trace
 
 ```typescript
-import { JSONataVersionDetector } from '@trace-viz/core';
 import { useTrace } from '@trace-viz/react';
+import { JSONataVersionDetector } from '@trace-viz/version-detector-jsonata';
 
 function TraceViewer() {
   const { state } = useTrace({
@@ -93,8 +93,8 @@ function TraceViewer() {
 ### With Trace Preparer
 
 ```typescript
-import { JSONataVersionDetector } from '@trace-viz/core';
 import { useTrace } from '@trace-viz/react';
+import { JSONataVersionDetector } from '@trace-viz/version-detector-jsonata';
 
 function TraceViewer() {
   const { state, process } = useTrace({
