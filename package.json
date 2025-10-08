@@ -24,7 +24,7 @@
     "test:e2e": "pnpm --filter basic-react test:e2e",
     "test:run": "pnpm -r test",
     "test:watch": "pnpm -r test",
-    "typecheck": "pnpm -r --filter './packages/*' typecheck"
+    "typecheck": "pnpm -r --filter './packages/*' --filter './examples/*' typecheck"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",

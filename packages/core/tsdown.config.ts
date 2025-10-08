@@ -4,7 +4,7 @@ export default defineConfig({
   clean: true,
   dts: true,
   entry: ['src/index.ts'],
-  external: ['jsonata', 'zod'],
+  external: ['jsonata'],
   format: ['esm'],
   minify: false,
   sourcemap: true,

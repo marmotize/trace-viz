@@ -1,10 +1,7 @@
-import { TraceV1Schema, TraceV2Schema } from '@trace-viz/core';
 import {
   JSONataVersionDetector,
   useTrace,
   type TracePreparer,
-  type TraceV1,
-  type TraceV2,
 } from '@trace-viz/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -15,6 +12,7 @@ import {
   traceV2_1_3,
   traceV2_9_0,
 } from './test-presets';
+import type { TraceV1, TraceV2 } from './types';
 import { TraceViewerV1 } from './visualizers/TraceViewerV1';
 import { TraceViewerV2 } from './visualizers/TraceViewerV2';
 
@@ -62,7 +60,7 @@ export function App() {
       prepare: async (trace, { version }) => {
         // Read latest control values from refs
         if (!preparerEnabledRef.current) {
-          return trace as TraceV1 | TraceV2;
+          return trace as unknown as TraceV1 | TraceV2;
         }
 
         if (preparerDelayEnabledRef.current && preparerDelayMsRef.current > 0) {
@@ -82,14 +80,12 @@ export function App() {
             : version;
 
         if (effectiveVersion === '1') {
-          const normalized = { ...trace, version: '1' };
-          return TraceV1Schema.parse(normalized);
+          return { ...trace, version: '1' } as TraceV1;
         }
         if (effectiveVersion === '2' || effectiveVersion?.startsWith('2.')) {
-          const normalized = { ...trace, version: '2' };
-          return TraceV2Schema.parse(normalized);
+          return { ...trace, version: '2' } as TraceV2;
         }
-        return trace as TraceV1 | TraceV2;
+        return trace as unknown as TraceV1 | TraceV2;
       },
     }),
     [],

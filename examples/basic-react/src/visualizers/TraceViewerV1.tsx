@@ -1,4 +1,4 @@
-import type { TraceV1 } from '@trace-viz/core';
+import type { TraceV1 } from '../types';
 
 export function TraceViewerV1({ trace }: { trace: TraceV1 }) {
   return (

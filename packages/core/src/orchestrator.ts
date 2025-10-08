@@ -147,7 +147,7 @@ export class TraceOrchestrator<T = unknown> {
             preparerError instanceof Error
               ? preparerError
               : new Error(String(preparerError));
-          // Invoke preparer's onError callback if available
+
           this.config.preparer.onError?.(normalizedError, {
             trace: rawTrace,
             version,
