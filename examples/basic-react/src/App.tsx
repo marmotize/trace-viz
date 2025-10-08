@@ -2,8 +2,6 @@ import {
   JSONataVersionDetector,
   useTrace,
   type TracePreparer,
-  type TraceV1,
-  type TraceV2,
 } from '@trace-viz/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -14,6 +12,7 @@ import {
   traceV2_1_3,
   traceV2_9_0,
 } from './test-presets';
+import type { TraceV1, TraceV2 } from './types';
 import { TraceViewerV1 } from './visualizers/TraceViewerV1';
 import { TraceViewerV2 } from './visualizers/TraceViewerV2';
 

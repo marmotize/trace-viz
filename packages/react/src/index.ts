@@ -12,8 +12,6 @@ export type {
   RegisterVisualizerOptions,
   SetDefaultVisualizerOptions,
   TracePreparer,
-  TraceV1,
-  TraceV2,
   Version,
   VersionDetector,
   VisualizerComponent,
