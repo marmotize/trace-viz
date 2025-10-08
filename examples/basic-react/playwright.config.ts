@@ -15,9 +15,10 @@ export default defineConfig({
       },
     },
   ],
-  reporter: 'html',
+  reporter: process.env.CI ? 'list' : 'html',
   retries: process.env.CI ? 2 : 0,
   testDir: './e2e',
+  timeout: process.env.CI ? 60_000 : 30_000,
   trace: 'on-first-retry',
   use: {
     baseURL: 'http://127.0.0.1:5173',
@@ -30,7 +31,7 @@ export default defineConfig({
       ? 'pnpm preview --port 5173 --strictPort --host 127.0.0.1'
       : 'pnpm dev',
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: process.env.CI ? 30_000 : 120_000,
     url: 'http://127.0.0.1:5173',
   },
   workers: process.env.CI ? 1 : undefined,
