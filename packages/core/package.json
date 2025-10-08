@@ -39,12 +39,14 @@
     "dev": "tsdown --watch",
     "prepublishOnly": "pnpm build",
     "test": "vitest --run --passWithNoTests",
+    "test:cov": "vitest --run --coverage",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "jsonata": "^2.0.3"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
     "tsdown": "^0.15.6",
     "typescript": "^5.3.3",
     "vitest": "^3.2.4"
