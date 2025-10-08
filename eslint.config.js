@@ -3,7 +3,12 @@ import nkzw from '@nkzw/eslint-config';
 export default [
   ...nkzw,
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/.cache/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.cache/**',
+      '**/coverage/**',
+    ],
   },
   {
     rules: {
