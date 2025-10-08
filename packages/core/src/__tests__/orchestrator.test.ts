@@ -232,7 +232,7 @@ describe('TraceOrchestrator', () => {
       await secondCall;
 
       resolveFirst!();
-      const firstResult = await firstCall;
+      await firstCall;
 
       const finalState = orchestrator.getState();
       expect(finalState.visualizer).toBe(mockVisualizer2);
