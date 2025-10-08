@@ -60,7 +60,7 @@ export function App() {
       prepare: async (trace, { version }) => {
         // Read latest control values from refs
         if (!preparerEnabledRef.current) {
-          return trace as TraceV1 | TraceV2;
+          return trace as unknown as TraceV1 | TraceV2;
         }
 
         if (preparerDelayEnabledRef.current && preparerDelayMsRef.current > 0) {
@@ -85,7 +85,7 @@ export function App() {
         if (effectiveVersion === '2' || effectiveVersion?.startsWith('2.')) {
           return { ...trace, version: '2' } as TraceV2;
         }
-        return trace as TraceV1 | TraceV2;
+        return trace as unknown as TraceV1 | TraceV2;
       },
     }),
     [],
