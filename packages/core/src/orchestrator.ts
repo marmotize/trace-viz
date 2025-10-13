@@ -42,7 +42,7 @@ export class TraceOrchestrator<T = unknown> {
    * Get current state snapshot
    */
   getState(): OrchestratorState<T> {
-    return { ...this.state };
+    return this.state;
   }
 
   /**
@@ -201,7 +201,10 @@ export class TraceOrchestrator<T = unknown> {
   private updateState(
     updates: Partial<OrchestratorState<T>>,
   ): OrchestratorState<T> {
-    this.state = { ...this.state, ...updates };
+    this.state = Object.freeze({
+      ...this.state,
+      ...updates,
+    }) as OrchestratorState<T>;
     this.subscribers.forEach((callback) => callback(this.state));
     return this.state;
   }
