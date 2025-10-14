@@ -6,13 +6,22 @@ export default defineConfig({
   },
   forbidOnly: !!process.env.CI,
   fullyParallel: true,
+  globalSetup: './playwright.global-setup.ts',
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  reporter: 'html',
+  reporter: [
+    ['list'],
+    [
+      'html',
+      {
+        open: 'never',
+      },
+    ],
+  ],
   retries: process.env.CI ? 2 : 0,
   testDir: './e2e',
   trace: 'on-first-retry',
