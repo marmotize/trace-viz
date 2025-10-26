@@ -22,7 +22,7 @@
     "release:publish": "pnpm -r build && changeset publish",
     "release:version": "changeset version && pnpm install --no-frozen-lockfile",
     "test": "npm-run-all --parallel lint typecheck test:run format:check",
-    "test:e2e": "pnpm --filter trace-viz-example test:e2e",
+    "test:e2e": "pnpm --filter trace-viz-example test:storybook",
     "test:run": "pnpm -r test",
     "test:watch": "pnpm -r test",
     "typecheck": "pnpm -r --filter './packages/*' --filter './examples/*' typecheck"
@@ -39,7 +39,6 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.4",
     "npm-run-all2": "^8.0.4",
-    "playwright": "^1.56.1",
     "prettier": "^3.6.2",
     "prettier-plugin-packagejson": "^2.5.19",
     "tsdown": "^0.15.9",

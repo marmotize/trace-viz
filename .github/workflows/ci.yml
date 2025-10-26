@@ -52,10 +52,6 @@ jobs:
         if: matrix.primary
         run: pnpm format:check
 
-      - name: Install Playwright
-        if: matrix.primary
-        run: pnpm --filter basic-react exec playwright install --with-deps chromium
-
       - name: E2E Tests
         if: matrix.primary
         run: pnpm test:e2e
