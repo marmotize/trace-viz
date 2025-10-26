@@ -52,6 +52,10 @@ jobs:
         if: matrix.primary
         run: pnpm format:check
 
+      - name: Install Playwright browsers for Storybook test-runner
+        if: matrix.primary
+        run: pnpm dlx playwright install --with-deps chromium
+
       - name: E2E Tests
         if: matrix.primary
         run: pnpm test:e2e
